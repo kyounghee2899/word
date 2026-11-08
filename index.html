@@ -51,6 +51,26 @@
   .mean{font-size:40px;color:var(--pri)}
   .ex{font-size:17px;color:var(--muted);margin-top:12px;text-align:center}
   .hint{font-size:14px;color:var(--muted);margin-top:8px}
+  .photo{width:150px;height:150px;object-fit:cover;border-radius:18px;background:var(--chip)}
+  .photo + .word{margin-top:6px}
+  .credit{font-family:system-ui,sans-serif;font-size:11px;color:var(--muted);margin-top:4px;text-align:center}
+  .credit a{color:inherit}
+  [hidden]{display:none!important}
+  .pstatus{font-family:system-ui,sans-serif;font-size:14px;color:var(--bad);margin:-4px 0 8px}
+  .picker{margin-top:16px}
+  .picker-head{display:flex;flex-direction:column;gap:6px}
+  .picker-search{display:flex;gap:8px;flex-wrap:wrap}
+  .pq{flex:1 1 160px;min-width:0;font:inherit;font-size:20px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+  .pq:focus{outline:none;border-color:var(--pri)}
+  .pmsg{min-height:24px;margin:10px 0;font-family:system-ui,sans-serif;font-size:15px}
+  .pmsg.bad{color:var(--bad)} .pmsg.ok{color:var(--ok)}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+  .pitem{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .pitem button{padding:0;border:3px solid transparent;border-radius:14px;overflow:hidden;cursor:pointer;background:var(--chip);aspect-ratio:1;max-width:100%}
+  .pitem button:hover,.pitem button:focus-visible{border-color:var(--pri);outline:none}
+  .pitem button.cur{border-color:var(--ok)}
+  .pitem img{width:100%;height:100%;object-fit:cover;display:block}
+  .pitem .credit{margin:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .counter{color:var(--muted);margin:10px 0}
   .star{background:none;border:0;font-size:28px;cursor:pointer}
   /* list */
@@ -98,11 +118,12 @@
     <div class="cats" id="cardCats"></div>
     <div class="flash" id="flash">
       <div class="flash-in">
-        <div class="face front"><div class="emoji" id="fEmoji"></div><div class="word" id="fWord"></div><div class="hint">카드를 누르면 뜻이 보여요</div></div>
+        <div class="face front"><div class="emoji" id="fEmoji"></div><img class="photo" id="fPhoto" alt="" hidden><div class="word" id="fWord"></div><div class="credit" id="fCredit" hidden></div><div class="hint">카드를 누르면 뜻이 보여요</div></div>
         <div class="face back"><div class="mean" id="fMean"></div><div class="ex" id="fEx"></div><button class="btn ghost" id="sayEx" style="margin-top:12px;font-size:15px;padding:8px 14px">🔊 예문 듣기</button></div>
       </div>
     </div>
     <div class="center counter" id="fCount"></div>
+    <div class="center pstatus" id="fStatus" hidden></div>
     <div class="row">
       <button class="btn ghost" id="prev">◀ 이전</button>
       <button class="btn" id="say">🔊 듣기</button>
@@ -111,6 +132,21 @@
     <div class="row">
       <button class="btn ghost" id="known">✅ 외웠어요</button>
       <button class="btn ghost" id="shuffle">🔀 섞기</button>
+      <button class="btn ghost" id="photoBtn">🖼️ 사진 찾기</button>
+    </div>
+    <div class="box picker" id="picker" hidden>
+      <div class="picker-head">
+        <label for="pQuery" class="hint" style="margin:0">사진 검색어 (영어)</label>
+        <div class="picker-search">
+          <input id="pQuery" class="pq" autocomplete="off" spellcheck="false">
+          <button class="btn" id="pSearch">검색</button>
+          <button class="btn ghost" id="pClose">닫기</button>
+        </div>
+      </div>
+      <div class="pmsg" id="pMsg"></div>
+      <div class="pgrid" id="pGrid"></div>
+      <div class="row"><button class="btn ghost" id="pIcon">아이콘으로 되돌리기</button></div>
+      <p class="hint center" style="margin:10px 0 0">사진을 누르면 이 단어의 사진으로 정해져요. 사진은 <a href="https://unsplash.com/?utm_source=word_playground&amp;utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>에서 가져와요.</p>
     </div>
   </section>
 
@@ -272,12 +308,126 @@ function makeCats(el, onPick){
 }
 const filterCat = c => c==="전체" ? WORDS : WORDS.filter(w=>w.cat===c);
 
+// ---------- Unsplash 사진 ----------
+// 키는 서버에만 있고, 브라우저는 /api/unsplash(검색), /api/unsplash-select(선택·다운로드 추적)만 불러요.
+// 고른 사진은 photos.json(서버에 저장)에 기록되어 같은 단어를 다시 검색하지 않아요.
+// 서버가 파일을 저장할 수 없으면(Vercel 등) 이 기기 브라우저에 저장해요. null = 아이콘 쓰기.
+const PHOTO_LS = "wordplay-photos";
+const PHOTO_QUERY = { bike: "bicycle" };            // 검색이 더 잘 되는 영어 표현
+const hasServer = /^https?:$/.test(location.protocol);
+let sharedPhotos = {};
+let localPhotos = (()=>{ try{ return JSON.parse(localStorage.getItem(PHOTO_LS)) || {} }catch(e){ return {} } })();
+const saveLocalPhotos = () => { try{ localStorage.setItem(PHOTO_LS, JSON.stringify(localPhotos)) }catch(e){} };
+const searchCache = new Map();
+let photoLoadError = "";
+
+const photoFor = en => (en in localPhotos) ? localPhotos[en] : (sharedPhotos[en] || null);
+const queryFor = en => PHOTO_QUERY[en] || en;
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const creditHtml = p => `Photo by <a href="${esc(p.authorUrl)}" target="_blank" rel="noopener">${esc(p.author)}</a> on <a href="${esc(p.photoUrl)}" target="_blank" rel="noopener">Unsplash</a>`;
+
+const NO_SERVER = "사진 서버에 연결되지 않았어요. 파일로 열었다면 python server.py로 열어 주세요.";
+async function photoApi(path, opts){
+  if(!hasServer) return {ok:false, message:NO_SERVER};
+  try{
+    const r = await fetch(path, opts);
+    let data=null; try{ data = await r.json() }catch(e){}
+    if(r.ok && data && !data.error) return {ok:true, data};
+    if(data && data.message) return {ok:false, message:data.message};
+    return {ok:false, message:`${NO_SERVER} (HTTP ${r.status})`};
+  }catch(e){ return {ok:false, message:"사진 서버에 연결하지 못했어요. 인터넷이나 서버가 켜져 있는지 확인해 주세요."}; }
+}
+
+async function loadSharedPhotos(){
+  if(!hasServer) return;
+  try{
+    const r = await fetch("photos.json", {cache:"no-store"});
+    if(r.ok) sharedPhotos = await r.json();
+  }catch(e){ /* 사진 목록이 없으면 아이콘으로 공부 */ }
+}
+
+function setStatus(msg){ $("fStatus").textContent = msg ? `⚠️ ${msg} · 아이콘으로 계속 공부해요` : ""; $("fStatus").hidden = !msg; }
+
+function showPhoto(w){
+  const img=$("fPhoto"), credit=$("fCredit"), p=photoFor(w.en);
+  img.hidden=true; credit.hidden=true; $("fEmoji").hidden=false; setStatus("");
+  $("photoBtn").textContent = p ? "🖼️ 사진 바꾸기" : "🖼️ 사진 찾기";
+  if(!p){ img.removeAttribute("src"); return; }
+  img.onload=()=>{ if(deck[idx]!==w) return; img.hidden=false; $("fEmoji").hidden=true; credit.hidden=false; };
+  img.onerror=()=>{ if(deck[idx]!==w) return; setStatus("사진 파일을 불러오지 못했어요(인터넷 연결 확인)"); };
+  img.alt=p.alt; img.style.background=p.color||""; img.src=p.thumb;   // API가 준 주소 그대로
+  credit.innerHTML=creditHtml(p);
+  credit.querySelectorAll("a").forEach(a=>a.onclick=e=>e.stopPropagation());
+}
+
+// 사진 바꾸기 창
+function pMsg(text, kind=""){ $("pMsg").textContent=text; $("pMsg").className="pmsg "+kind; }
+function openPicker(){
+  const w=deck[idx];
+  $("picker").hidden=false;
+  $("pQuery").value = photoFor(w.en)?.query || queryFor(w.en);
+  $("pIcon").hidden = !photoFor(w.en);
+  $("pGrid").innerHTML=""; pMsg("");
+  runSearch();
+}
+function closePicker(){ $("picker").hidden=true; }
+async function runSearch(){
+  const w=deck[idx], q=$("pQuery").value.trim().toLowerCase().slice(0,50);
+  if(!q) return pMsg("검색어를 넣어 주세요.","bad");
+  let results = searchCache.get(q);
+  if(!results){
+    pMsg("사진을 찾는 중…");
+    const res = await photoApi(`/api/unsplash?query=${encodeURIComponent(q)}&per_page=9`);
+    if(deck[idx]!==w || $("picker").hidden) return;
+    if(!res.ok){ $("pGrid").innerHTML=""; return pMsg(res.message,"bad"); }
+    results = res.data.results; searchCache.set(q, results);
+  }
+  if(!results.length){ $("pGrid").innerHTML=""; return pMsg(`"${q}" 사진을 찾지 못했어요. 다른 검색어로 해 보세요.`,"bad"); }
+  pMsg(`"${q}" 사진 ${results.length}장 · 단어에 맞는 사진을 눌러 주세요`);
+  const cur = photoFor(w.en)?.id;
+  $("pGrid").innerHTML = results.map((p,i)=>`
+    <div class="pitem">
+      <button data-i="${i}" class="${p.id===cur?"cur":""}" style="background:${esc(p.color||"")}" aria-label="${esc(p.alt)} 사진 고르기"><img src="${esc(p.thumb)}" alt="${esc(p.alt)}" loading="lazy"></button>
+      <div class="credit">${creditHtml(p)}</div>
+    </div>`).join("");
+  $("pGrid").querySelectorAll("button").forEach(b=>b.onclick=()=>choosePhoto(w, results[+b.dataset.i], q));
+}
+async function choosePhoto(w, p, q){
+  pMsg("사진을 저장하는 중…");
+  const res = await photoApi("/api/unsplash-select", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({word:w.en, id:p.id, query:q}),
+  });
+  if(!res.ok) return pMsg(`저장하지 못했어요: ${res.message}`,"bad");
+  if(res.data.saved){ sharedPhotos[w.en]=res.data.photo; delete localPhotos[w.en]; }
+  else { localPhotos[w.en]=res.data.photo; }
+  saveLocalPhotos();
+  closePicker(); showCard();
+}
+async function useIcon(){
+  const w=deck[idx];
+  const res = await photoApi("/api/unsplash-select", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({word:w.en, id:null}),
+  });
+  if(res.ok && res.data.saved){ delete sharedPhotos[w.en]; delete localPhotos[w.en]; }
+  else { localPhotos[w.en]=null; }   // 서버가 없어도 이 기기에서는 아이콘으로
+  saveLocalPhotos();
+  closePicker(); showCard();
+}
+$("photoBtn").onclick=()=> $("picker").hidden ? openPicker() : closePicker();
+$("pSearch").onclick=runSearch;
+$("pQuery").onkeydown=e=>{ if(e.key==="Enter") runSearch(); };
+$("pClose").onclick=closePicker;
+$("pIcon").onclick=useIcon;
+
 // ---------- 카드 ----------
 let deck = [...WORDS], idx = 0;
 function showCard(){
   const w = deck[idx];
   $("flash").classList.remove("flip");
   $("fEmoji").textContent=w.emoji; $("fWord").textContent=w.en;
+  closePicker();
+  showPhoto(w);
   $("fMean").textContent=w.ko; $("fEx").textContent=w.ex;
   $("fCount").textContent=`${idx+1} / ${deck.length}` + (data.known.includes(w.en)?"  ✅":"");
   $("known").textContent = data.known.includes(w.en) ? "↩️ 다시 공부할래요" : "✅ 외웠어요";
@@ -296,6 +446,7 @@ $("known").onclick=()=>{
 makeCats($("cardCats"), c=>{deck=filterCat(c); idx=0; showCard()});
 document.addEventListener("keydown",e=>{
   if(!$("cards").classList.contains("on")) return;
+  if(e.target.closest("input, textarea")) return; // 검색어 입력 중에는 단축키 끄기
   if(e.key==="ArrowRight") $("next").click();
   if(e.key==="ArrowLeft") $("prev").click();
   if(e.key===" "){e.preventDefault(); $("flash").click()}
@@ -446,6 +597,7 @@ $("reset").onclick=()=>{
 
 if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=()=>{};
 showCard(); renderStats();
+loadSharedPhotos().then(()=>showCard());
 </script>
 </body>
 </html>

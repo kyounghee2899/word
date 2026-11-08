@@ -1,0 +1,62 @@
+{
+  "apple": {
+    "alt": "a red apple with a stem",
+    "author": "Daniel Shapiro",
+    "authorUrl": "https://unsplash.com/@dshap?utm_source=word_playground&utm_medium=referral",
+    "chosenAt": "2026-11-08",
+    "color": "#590c0c",
+    "id": "-QtglPvx3I0",
+    "photoUrl": "https://unsplash.com/photos/a-red-apple-with-a-stem--QtglPvx3I0?utm_source=word_playground&utm_medium=referral",
+    "query": "apple",
+    "src": "https://images.unsplash.com/photo-1669864573166-f99a20334f46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTQ5fA&ixlib=rb-4.1.0&q=80&w=1080",
+    "thumb": "https://images.unsplash.com/photo-1669864573166-f99a20334f46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTQ5fA&ixlib=rb-4.1.0&q=80&w=400"
+  },
+  "bike": {
+    "alt": "man in red polo shirt riding on black bicycle",
+    "author": "Geoffrey Arduini",
+    "authorUrl": "https://unsplash.com/@geoffreyarduini?utm_source=word_playground&utm_medium=referral",
+    "chosenAt": "2026-11-08",
+    "color": "#262626",
+    "id": "JVxNW80fluA",
+    "photoUrl": "https://unsplash.com/photos/man-in-red-polo-shirt-riding-on-black-bicycle-JVxNW80fluA?utm_source=word_playground&utm_medium=referral",
+    "query": "bicycle",
+    "src": "https://images.unsplash.com/photo-1586641598453-dce49fa716e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUxfA&ixlib=rb-4.1.0&q=80&w=1080",
+    "thumb": "https://images.unsplash.com/photo-1586641598453-dce49fa716e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUxfA&ixlib=rb-4.1.0&q=80&w=400"
+  },
+  "book": {
+    "alt": "white opened book beside tray",
+    "author": "Olesia 🇺🇦 Buiar",
+    "authorUrl": "https://unsplash.com/@olesichka?utm_source=word_playground&utm_medium=referral",
+    "chosenAt": "2026-11-08",
+    "color": "#c0c0c0",
+    "id": "ZD03qVhBJZg",
+    "photoUrl": "https://unsplash.com/photos/white-opened-book-beside-tray-ZD03qVhBJZg?utm_source=word_playground&utm_medium=referral",
+    "query": "book",
+    "src": "https://images.unsplash.com/photo-1558901357-ca41e027e43a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUwfA&ixlib=rb-4.1.0&q=80&w=1080",
+    "thumb": "https://images.unsplash.com/photo-1558901357-ca41e027e43a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUwfA&ixlib=rb-4.1.0&q=80&w=400"
+  },
+  "dog": {
+    "alt": "yellow Labrador retriever puppy",
+    "author": "Ben Owen",
+    "authorUrl": "https://unsplash.com/@circleb?utm_source=word_playground&utm_medium=referral",
+    "chosenAt": "2026-11-08",
+    "color": "#26400c",
+    "id": "FFwNGYZK-2o",
+    "photoUrl": "https://unsplash.com/photos/yellow-labrador-retriever-puppy-FFwNGYZK-2o?utm_source=word_playground&utm_medium=referral",
+    "query": "dog",
+    "src": "https://images.unsplash.com/photo-1561495376-dc9c7c5b8726?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTQ5fA&ixlib=rb-4.1.0&q=80&w=1080",
+    "thumb": "https://images.unsplash.com/photo-1561495376-dc9c7c5b8726?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTQ5fA&ixlib=rb-4.1.0&q=80&w=400"
+  },
+  "tree": {
+    "alt": "green leafed tree during daytime",
+    "author": "Ulf Bodin",
+    "authorUrl": "https://unsplash.com/@ulfbodin?utm_source=word_playground&utm_medium=referral",
+    "chosenAt": "2026-11-08",
+    "color": "#0c2626",
+    "id": "pf3oZmC0ybM",
+    "photoUrl": "https://unsplash.com/photos/green-leafed-tree-during-daytime-pf3oZmC0ybM?utm_source=word_playground&utm_medium=referral",
+    "query": "tree",
+    "src": "https://images.unsplash.com/photo-1516566525880-0dbff7c6cb36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUyfA&ixlib=rb-4.1.0&q=80&w=1080",
+    "thumb": "https://images.unsplash.com/photo-1516566525880-0dbff7c6cb36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTI3MDM3fDB8MXxhbGx8fHx8fHx8fHwxNzk0MTE4NTUyfA&ixlib=rb-4.1.0&q=80&w=400"
+  }
+}

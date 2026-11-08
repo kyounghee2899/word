@@ -1,3 +1,9 @@
 # 로컬 미리보기 설정 (컴퓨터마다 경로가 다름)
 .claude/
 __pycache__/
+
+# 비밀키 (UNSPLASH_ACCESS_KEY 등) — 절대 커밋하지 않기
+.env
+.env.*
+!.env.example
+.vercel/
