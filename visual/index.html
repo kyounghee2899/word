@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생각 씨앗 시각화 챌린지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Gaegu:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f0e6; --card:#fffdf8; --ink:#2f2a24; --muted:#7d7266; --line:#ece2d2;
+  --g:#5b7342; --g2:#8fb069; --gl:#e8efdc; --o:#d9774a; --ol:#fbe7dc; --y:#fdf3d4; --b:#e6eff7; --p:#fbe9ef; --v:#efeaf8;
+  --shadow:0 2px 0 rgba(80,60,30,.05), 0 8px 24px rgba(80,60,30,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1e1c18; --card:#2a2721; --ink:#f1ebe0; --muted:#b4a999; --line:#3d3830;
+    --g:#a9c98a; --g2:#7f9d5e; --gl:#323a28; --o:#f0956a; --ol:#40302a; --y:#3b3523; --b:#26313b; --p:#3b2a30; --v:#2f2b3a;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1e1c18; --card:#2a2721; --ink:#f1ebe0; --muted:#b4a999; --line:#3d3830;
+  --g:#a9c98a; --g2:#7f9d5e; --gl:#323a28; --o:#f0956a; --ol:#40302a; --y:#3b3523; --b:#26313b; --p:#3b2a30; --v:#2f2b3a;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Gowun Dodum',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,.jua{font-family:'Jua',system-ui,sans-serif;font-weight:400;letter-spacing:-.01em}
+.hand{font-family:'Gaegu',cursive;font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+input:focus,textarea:focus{outline:2px solid var(--g2);border-color:transparent}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:820px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Jua';font-size:19px;color:var(--g);background:none;border:0;padding:0}
+.top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:14px}
+main{max-width:820px;margin:0 auto;padding:16px 16px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow)}
+.card+.card{margin-top:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;background:var(--g);color:#fff;font-family:'Jua';font-size:17px;min-height:46px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{background:#5e7f3d}}
+.btn.ghost{background:var(--gl);color:var(--g)}
+.btn.line{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.warm{background:var(--o)}
+.btn.sm{padding:7px 14px;min-height:36px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.row.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;background:var(--gl);color:var(--g);font-weight:700}
+.pill.o{background:var(--ol);color:var(--o)}
+.hl-g{color:var(--g)} .hl-o{color:var(--o)}
+.under{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--g2) 40%,transparent) 0)}
+.hidden{display:none!important}
+/* fractions */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.05;font-size:.82em;margin:0 2px}
+.fr i{font-style:normal;padding:0 2px}
+.fr i:first-child{border-bottom:1.5px solid currentColor}
+/* home */
+.hero{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.hero h1{font-size:30px;line-height:1.3;margin:6px 0 10px}
+.hero .plant{width:120px}
+.students{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+.stu{border:1.5px solid var(--line);background:var(--card);border-radius:18px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.stu b{font-family:'Jua';font-size:19px;font-weight:400}
+.stu.add{align-items:center;justify-content:center;border-style:dashed;color:var(--g)}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grades button{border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:12px 0;font-family:'Jua';font-size:18px}
+.grades button.on{background:var(--g);border-color:var(--g);color:#fff}
+.steps6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.steps6 div{border-radius:14px;padding:10px;font-size:14px;line-height:1.35}
+.steps6 b{display:block;font-family:'Jua';font-weight:400;font-size:15px}
+.s1{background:var(--y)}.s2{background:var(--b)}.s3{background:var(--p)}.s4{background:var(--gl)}.s5{background:var(--v)}.s6{background:var(--gl)}
+/* dashboard */
+.today{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.today .plant{width:110px}
+.cal{display:grid;grid-template-columns:auto repeat(5,1fr);gap:6px;align-items:center;margin-top:10px}
+.cal .wk{font-size:13px;color:var(--muted);padding-right:4px;white-space:nowrap}
+.day{aspect-ratio:1;border-radius:14px;border:1.5px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);padding:0;gap:0}
+.day .n{font-family:'Jua';font-size:15px;color:var(--ink)}
+.day .ic{font-size:18px;line-height:1.1}
+.day.done{background:var(--gl);border-color:var(--g2)}
+.day.half{background:var(--y)}
+.day.now{border:2.5px solid var(--o);background:var(--ol)}
+.day.lock{opacity:.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;text-align:center}
+.stat b{display:block;font-family:'Jua';font-weight:400;font-size:22px;color:var(--g)}
+.stat span{font-size:12px;color:var(--muted)}
+/* solve */
+.stepper{display:flex;gap:4px;margin:4px 0 14px;overflow-x:auto;scrollbar-width:none}
+.stepper button{flex:1;min-width:64px;border:0;background:transparent;padding:4px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--muted)}
+.stepper .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-family:'Jua';font-size:14px;color:var(--muted)}
+.stepper button.on{color:var(--ink)}
+.stepper button.on .dot{background:var(--o);color:#fff}
+.stepper button.ok .dot{background:var(--g2);color:#fff}
+.stepper button:disabled{cursor:default}
+.ptext{font-size:19px;line-height:1.85;word-break:keep-all}
+.tok{border-radius:6px;padding:1px 1px;cursor:pointer;transition:background .15s}
+.tok.k{background:#fff0a8;color:#2f2a24}
+.tok.f{background:#ffc9da;color:#2f2a24}
+.markers{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.markers button{border:2px solid transparent;border-radius:999px;padding:6px 12px;font-size:14px;background:var(--card);border-color:var(--line)}
+.markers button.on{border-color:var(--ink)}
+.mk-k{background:#fff0a8!important;color:#2f2a24}
+.mk-f{background:#ffc9da!important;color:#2f2a24}
+.qhead{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.timer{display:flex;align-items:center;gap:10px;background:var(--b);border-radius:16px;padding:10px 14px}
+.timer .bar{flex:1;height:8px;border-radius:99px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.timer .bar i{display:block;height:100%;background:#7fa7c9;border-radius:99px;transition:width 1s linear}
+.timer b{font-family:'Jua';font-weight:400;font-size:20px;min-width:58px;text-align:right}
+.pad{position:relative;width:100%;aspect-ratio:10/7;border-radius:16px;overflow:hidden;border:1.5px solid var(--line);background:#fff;touch-action:none}
+.pad canvas{position:absolute;inset:0;width:100%;height:100%}
+.tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.tools button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;min-width:42px;height:42px;padding:0 10px;font-size:14px}
+.tools button.on{border-color:var(--g);background:var(--gl);color:var(--g)}
+.tools .sw{width:30px;height:30px;min-width:0;padding:0;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1.5px var(--line)}
+.tools .sw.on{box-shadow:0 0 0 2.5px var(--ink)}
+.tools .sep{width:1px;height:28px;background:var(--line);margin:0 2px}
+.tpls{display:flex;gap:6px;flex-wrap:wrap}
+.tpls button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:14px}
+.tpls button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.hint{background:var(--y);border-radius:16px;padding:12px 14px;margin-top:10px}
+.photo{margin-top:10px;position:relative}
+.photo img{max-width:100%;border-radius:14px;border:1px solid var(--line);display:block}
+.ansrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ansrow label{display:flex;align-items:center;gap:6px}
+.ansrow input{width:110px;font-size:20px;text-align:center;font-family:'Jua'}
+.feedback{border-radius:16px;padding:12px 14px;margin-top:12px}
+.feedback.ok{background:var(--gl)}
+.feedback.no{background:var(--ol)}
+.mini{background:var(--bg);border-radius:14px;padding:10px 12px;font-size:15px}
+.model .stp{border-left:4px solid var(--g2);padding:4px 0 4px 14px;margin:14px 0}
+.model .stp h3{margin:0 0 6px;font-size:18px;display:flex;align-items:center;gap:8px}
+.model .stp h3 .num{width:24px;height:24px;border-radius:50%;background:var(--g);color:#fff;display:grid;place-items:center;font-size:14px}
+.model ul{margin:4px 0;padding-left:20px}
+.eq{font-size:18px;line-height:1.9}
+.ans-badge{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--g);border-radius:12px;padding:4px 14px;font-family:'Jua';font-size:19px;color:var(--g)}
+.tip{display:flex;gap:10px;align-items:flex-start;background:var(--gl);border-radius:18px;padding:12px 14px;margin-top:12px}
+.tip .hand{font-size:20px;line-height:1.35}
+.vz{width:100%;height:auto;display:block;margin:6px 0;font-family:'Gowun Dodum',sans-serif}
+.vz .vt{fill:var(--ink)}
+.vz .vt.vo{fill:var(--o)} .vz .vt.vg{fill:var(--g)}
+.vz .vs{stroke:var(--ink)} .vz .vfill{fill:var(--ink)}
+.vz .vbox{stroke:var(--ink);stroke-width:1.4}
+.vz .vq{stroke:var(--o);stroke-width:2;stroke-dasharray:5 4}
+.vz .vgrp{fill:var(--card);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3}
+.vz .vhead{fill:var(--gl);stroke:var(--muted)} .vz .vcell{fill:var(--card);stroke:var(--muted)} .vz .vhl{fill:#fff3b8;stroke:var(--muted)}
+:root[data-theme="dark"] .vz .vhl{fill:#5a5130}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .vz .vhl{fill:#5a5130}}
+.vz .vcellb{fill:none;stroke:var(--muted);stroke-width:1.2}
+.vz .vgc{stroke:var(--muted);stroke-width:1.2}
+.vz rect[fill="#f6efe0"]{fill:var(--bg)}
+.vcap{font-size:14px;color:var(--muted);margin-top:8px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp img{width:100%;border-radius:12px;border:1px solid var(--line);background:#fff}
+.checks label{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.checks input{width:22px;height:22px;accent-color:var(--g)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:100px;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:10px 6px;font-size:15px}
+.seg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.cardimg{width:100%;border-radius:16px;border:1px solid var(--line)}
+/* overlay */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(30,25,15,.45);display:grid;place-items:center;padding:16px}
+.ov .card{max-width:420px;width:100%;text-align:center}
+.stamp{font-family:'Jua';font-size:28px;color:var(--g);margin:6px 0}
+@keyframes grow{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.grow{animation:grow .6s cubic-bezier(.3,1.6,.6,1)}
+/* teacher */
+table.tb{width:100%;border-collapse:collapse;font-size:14px}
+.tb th,.tb td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:middle}
+.tb th{color:var(--muted);font-weight:400}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:0;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.plist details{border:1px solid var(--line);border-radius:16px;padding:10px 14px;background:var(--card);margin-top:8px}
+.plist summary{cursor:pointer;font-weight:700}
+.scroll-x{overflow-x:auto}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;z-index:60;font-size:15px;max-width:calc(100% - 32px)}
+#printArea{display:none}
+@media (max-width:560px){
+  .hero{grid-template-columns:1fr}.hero .plant{display:none}
+  .hero h1{font-size:25px}
+  .steps6{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cmp{grid-template-columns:1fr}
+  .today{grid-template-columns:1fr}.today .plant{width:90px;margin:0 auto}
+  .ptext{font-size:17.5px}
+  .card{padding:16px}
+}
+@media print{
+  body{background:#fff}
+  .top,main,.toast,.ov{display:none!important}
+  #printArea{display:block}
+  .psheet{page-break-after:always;padding:8mm 4mm;font-size:13pt}
+  .pprob{border:1px solid #bbb;border-radius:10px;padding:10px 14px;margin-bottom:10px;page-break-inside:avoid}
+  .pbox{height:70mm;border:1.5px dashed #aaa;border-radius:8px;margin:8px 0;position:relative}
+  .pbox span{position:absolute;left:8px;top:4px;color:#999;font-size:10pt}
+  .pline{border-bottom:1px solid #999;height:9mm}
+  .vz .vt{fill:#222}.vz .vs{stroke:#222}.vz .vfill{fill:#222}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <button class="brand" id="brandBtn" aria-label="처음으로"><span id="brandIcon"></span><span id="brandName">시각화 챌린지</span></button>
+  <span class="sp"></span>
+  <span id="whoChip"></span>
+  <button class="chip" id="teacherBtn" title="선생님 메뉴">👩‍🏫 선생님</button>
+</div></header>
+<main id="app"></main>
+<div id="printArea"></div>
+
+<script src="problems.js"></script>
+<script src="viz.js"></script>
+<script>
+'use strict';
+/* ================= 저장소 ================= */
+const KEY = 'vizChallenge.v1';
+const DEFAULTS = { students: [], current: null, pin: '0000', daily: true, academy: '생각 씨앗 수학' };
+let DB;
+try { DB = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { DB = { ...DEFAULTS }; }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch (e) { toast('저장 공간이 부족해요. 선생님 메뉴에서 백업 후 정리해 주세요.'); }
+}
+// 그림·사진은 용량이 커서 IndexedDB에 저장
+const IMG = (() => {
+  let dbp = null, mem = new Map();
+  const open = () => dbp || (dbp = new Promise(res => {
+    try {
+      const r = indexedDB.open('vizChallengeImg', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('img');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => res(null);
+    } catch (e) { res(null); }
+  }));
+  const tx = async (mode, fn) => {
+    const db = await open();
+    if (!db) return fn(null);
+    return new Promise(res => {
+      const t = db.transaction('img', mode), st = t.objectStore('img');
+      const r = fn(st);
+      t.oncomplete = () => res(r && r.result);
+      t.onerror = () => res(undefined);
+    });
+  };
+  return {
+    get: k => tx('readonly', st => st ? st.get(k) : { result: mem.get(k) }),
+    set: (k, v) => tx('readwrite', st => st ? st.put(v, k) : mem.set(k, v)),
+    del: k => tx('readwrite', st => st ? st.delete(k) : mem.delete(k)),
+    keys: () => tx('readonly', st => st ? st.getAllKeys() : { result: [...mem.keys()] }),
+  };
+})();
+
+/* ================= 도우미 ================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const frac = s => esc(s)
+  .replace(/(\d+) (\d+)\/(\d+)/g, '$1<span class="fr"><i>$2</i><i>$3</i></span>')
+  .replace(/(\d+)\/(\d+)/g, '<span class="fr"><i>$1</i><i>$2</i></span>');
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const fmtDate = s => s ? s.slice(5).replace('-', '/') : '';
+const uid = () => Math.random().toString(36).slice(2, 9);
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+const student = () => DB.students.find(s => s.id === DB.current);
+const probs = g => PROBLEMS[g] || [];
+const pid = (g, i) => `${g}-${i}`;
+const weekOf = i => Math.floor(i / 5) + 1;
+
+function parseNum(s) {
+  s = String(s ?? '').replace(/,/g, '').replace(/\s+/g, ' ').trim();
+  if (!s) return NaN;
+  let m;
+  if ((m = s.match(/^(\d+)\s*(?:와|과|\s)\s*(\d+)\s*분의\s*(\d+)$/))) return +m[1] + +m[3] / +m[2];
+  if ((m = s.match(/^(\d+)\s*분의\s*(\d+)$/))) return +m[2] / +m[1];
+  if ((m = s.match(/^(\d+)\s*(?:와|과|\s)\s*(\d+)\s*\/\s*(\d+)$/))) return +m[1] + +m[2] / +m[3];
+  if ((m = s.match(/^(\d+)\s*\/\s*(\d+)$/))) return +m[1] / +m[2];
+  if (/^-?\d*\.?\d+$/.test(s)) return +s;
+  return NaN;
+}
+const isFracAns = v => typeof v === 'string' && v.includes('/');
+
+/* 새싹 그림 (단계 0~4) */
+function plant(stage, size = 120) {
+  stage = Math.max(0, Math.min(4, stage));
+  const L = (x, y, r, rot, c = '#8fb069') => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * .5}" transform="rotate(${rot} ${x} ${y})" fill="${c}" stroke="#5b7342" stroke-width="1.5"/>`;
+  const stemTop = [92, 76, 62, 46, 40][stage];
+  let s = `<path d="M30 98 h60 l-7 22 h-46 z" fill="#d79a6c" stroke="#a8693f" stroke-width="1.5"/><rect x="26" y="92" width="68" height="9" rx="4" fill="#e2ad80" stroke="#a8693f" stroke-width="1.5"/>`;
+  if (stage === 0) s += `<ellipse cx="60" cy="90" rx="9" ry="6" fill="#a8743f"/><path d="M60 85 q2 -6 6 -7" stroke="#8fb069" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  else {
+    s += `<path d="M60 92 C60 ${stemTop + 20} 60 ${stemTop + 10} 60 ${stemTop}" stroke="#6d8c4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    if (stage === 1) s += L(50, stemTop + 2, 11, -30) + L(70, stemTop + 2, 11, 30);
+    if (stage >= 2) s += L(47, stemTop + 22, 11, -25) + L(73, stemTop + 22, 11, 25);
+    if (stage === 2) s += L(52, stemTop, 10, -45) + L(68, stemTop, 10, 45);
+    if (stage >= 3) s += `<circle cx="60" cy="${stemTop - 6}" r="${stage === 4 ? 26 : 22}" fill="#9cbf76" stroke="#5b7342" stroke-width="1.5"/>` + L(44, stemTop + 26, 11, -25) + L(76, stemTop + 26, 11, 25);
+    if (stage === 4) [[48, stemTop - 14, '#f4a3b5'], [70, stemTop - 16, '#f6c75b'], [60, stemTop + 2, '#f4a3b5'], [74, stemTop, '#fff'], [46, stemTop + 2, '#f6c75b']]
+      .forEach(([x, y, c]) => s += `<circle cx="${x}" cy="${y}" r="4.5" fill="${c}" stroke="#c77" stroke-width=".8"/>`);
+  }
+  return `<svg class="plant" viewBox="0 0 120 124" width="${size}" aria-hidden="true">${s}</svg>`;
+}
+const STAGE_NAMES = ['씨앗', '새싹', '떡잎', '어린 나무', '꽃 핀 나무'];
+const stageOf = n => n >= 20 ? 4 : n >= 14 ? 3 : n >= 7 ? 2 : n >= 1 ? 1 : 0;
+
+/* ================= 진행 상태 ================= */
+function progress(st) {
+  const P = probs(st.grade), recs = st.recs || {};
+  const certCount = P.filter((_, i) => recs[pid(st.grade, i)]?.cert).length;
+  const doneCount = P.filter((_, i) => recs[pid(st.grade, i)]?.done).length;
+  let next = P.findIndex((_, i) => !recs[pid(st.grade, i)]?.cert);
+  const t = today();
+  const todayCount = Object.values(recs).filter(r => r.date === t && r.grade === st.grade).length;
+  const extra = st.extraDate === t ? (st.extra || 0) : 0;
+  const locked = DB.daily && next >= 0 && todayCount >= 1 + extra;
+  // 마무리 안 한 문제(인증만 하고 다시 살펴보기 안 함)
+  const unfinished = P.findIndex((_, i) => recs[pid(st.grade, i)]?.cert && !recs[pid(st.grade, i)]?.done);
+  // 연속 일수
+  const days = new Set(Object.values(recs).filter(r => r.cert).map(r => r.date));
+  let streak = 0; const d = new Date();
+  if (!days.has(t)) d.setDate(d.getDate() - 1);
+  for (;;) {
+    const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (days.has(k)) { streak++; d.setDate(d.getDate() - 1); }
+    else if (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() - 1); if (streak > 400) break; }
+    else break;
+    if (streak > 400) break;
+  }
+  const first = P.filter((_, i) => { const r = recs[pid(st.grade, i)]; return r?.cert && r.correct && r.tries === 1; }).length;
+  const secs = Object.values(recs).reduce((a, r) => a + (r.secs || 0), 0);
+  return { P, recs, certCount, doneCount, next, locked, unfinished, streak, first, secs };
+}
+
+/* ================= 화면 이동 ================= */
+let view = { name: 'home' };
+let cleanup = null;
+function go(name, args = {}) {
+  if (cleanup) { cleanup(); cleanup = null; }
+  view = { name, ...args };
+  render();
+  window.scrollTo({ top: 0 });
+}
+function render() {
+  const st = student();
+  $('#brandIcon').innerHTML = plant(2, 26);
+  $('#brandName').textContent = '시각화 챌린지';
+  $('#whoChip').innerHTML = st && view.name !== 'home' ? `<button class="chip" id="switchStu">🙂 ${esc(st.name)} · 초${st.grade}</button>` : '';
+  const sw = $('#switchStu'); if (sw) sw.onclick = () => go('home');
+  ({ home: vHome, dash: vDash, solve: vSolve, review: vReview, teacher: vTeacher }[view.name] || vHome)();
+}
+$('#brandBtn').onclick = () => go(student() ? 'dash' : 'home');
+$('#teacherBtn').onclick = () => askPin(() => go('teacher'));
+
+/* ================= 처음 화면 ================= */
+function vHome() {
+  app.innerHTML = `
+  <section class="card">
+    <div class="hero">
+      <div>
+        <span class="pill">초2 · 초3 · 초4 · 초5 🌱</span>
+        <h1>문제를 더 많이 풀기 전에,<br><span class="hl-g under">생각을 눈에 보이게</span> 만드는 연습</h1>
+        <p class="muted" style="margin:0">하루 한 문제, 그림·수직선·도식으로 생각을 꺼내고<br>스스로 풀어내는 힘을 기르는 4주 챌린지예요.</p>
+      </div>
+      ${plant(3, 130)}
+    </div>
+    <div class="steps6">
+      <div class="s1"><b>1. 문제 읽기</b>아는 것·구하는 것 표시</div>
+      <div class="s2"><b>2. 혼자 생각하기</b>15분, 그림으로 꺼내기</div>
+      <div class="s3"><b>3. 식과 답</b>그림을 보고 식 세우기</div>
+      <div class="s4"><b>4. 풀이 인증</b>내 생각을 먼저 남겨요</div>
+      <div class="s5"><b>5. 모범 풀이</b>선생님의 시각화 풀이</div>
+      <div class="s6"><b>6. 다시 살펴보기</b>내 생각과 비교하기</div>
+    </div>
+  </section>
+  <section class="card">
+    <h2 style="margin:0">누가 공부하나요?</h2>
+    <p class="muted small" style="margin:4px 0 0">이름을 누르면 시작해요. 기록은 이 기기에 저장돼요.</p>
+    <div class="students">
+      ${DB.students.map(s => {
+        const p = progress(s);
+        return `<button class="stu" data-id="${s.id}"><span>${plant(stageOf(p.certCount), 36)}</span><b>${esc(s.name)}</b><span class="small muted">초${s.grade} · ${p.certCount}/20일</span></button>`;
+      }).join('')}
+      <button class="stu add" id="addStu"><span style="font-size:28px">＋</span><span>새로 시작하기</span></button>
+    </div>
+  </section>`;
+  $$('.stu[data-id]').forEach(b => b.onclick = () => { DB.current = b.dataset.id; save(); go('dash'); });
+  $('#addStu').onclick = addStudentDialog;
+}
+
+function addStudentDialog() {
+  let g = 3;
+  const ov = overlay(`
+    <h2 style="margin:0 0 4px">반가워요! 🌱</h2>
+    <p class="muted small" style="margin:0 0 14px">이름과 학년을 알려 주세요.</p>
+    <input id="nm" maxlength="12" placeholder="이름 (예: 김지우)" autocomplete="off">
+    <div class="grades" style="margin:12px 0 16px">${[2, 3, 4, 5].map(x => `<button data-g="${x}" class="${x === g ? 'on' : ''}">초${x}</button>`).join('')}</div>
+    <div class="row" style="justify-content:center"><button class="btn line" data-x>취소</button><button class="btn" id="ok">시작하기 →</button></div>`);
+  $$('[data-g]', ov).forEach(b => b.onclick = () => { g = +b.dataset.g; $$('[data-g]', ov).forEach(x => x.classList.toggle('on', x === b)); });
+  $('#nm', ov).focus();
+  $('#ok', ov).onclick = () => {
+    const name = $('#nm', ov).value.trim();
+    if (!name) { $('#nm', ov).focus(); return toast('이름을 써 주세요.'); }
+    const s = { id: uid(), name, grade: g, recs: {}, drafts: {}, created: today() };
+    DB.students.push(s); DB.current = s.id; save(); ov.remove(); go('dash');
+  };
+}
+function overlay(html) {
+  const ov = document.createElement('div'); ov.className = 'ov';
+  ov.innerHTML = `<div class="card grow">${html}</div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('[data-x]')) ov.remove(); });
+  return ov;
+}
+
+/* ================= 내 챌린지 (대시보드) ================= */
+function vDash() {
+  const st = student(); if (!st) return go('home');
+  const p = progress(st);
+  const g = st.grade, P = p.P;
+  let todayHtml;
+  if (p.unfinished >= 0) {
+    const pr = P[p.unfinished];
+    todayHtml = `<span class="pill o">Day ${p.unfinished + 1} · 마무리가 남았어요</span>
+      <h2 style="margin:6px 0">모범 풀이와 내 생각을 비교해 볼까요?</h2>
+      <p class="muted small" style="margin:0 0 12px">${frac(pr.t.slice(0, 42))}…</p>
+      <button class="btn" data-open="${p.unfinished}">이어서 하기 →</button>`;
+  } else if (p.next < 0) {
+    todayHtml = `<span class="pill">챌린지 완주 🎉</span><h2 style="margin:6px 0">20문제를 모두 끝냈어요!</h2>
+      <p class="muted small" style="margin:0 0 12px">${STAGE_NAMES[4]}가 되었어요. 완주 카드를 받아 가세요.</p>
+      <button class="btn warm" id="certBtn">완주 카드 저장하기</button>`;
+  } else if (p.locked) {
+    todayHtml = `<span class="pill">오늘의 문제 완료 ✔</span><h2 style="margin:6px 0">오늘도 생각이 한 뼘 자랐어요!</h2>
+      <p class="muted small" style="margin:0 0 12px">Day ${p.next + 1} 문제는 내일 열려요. 오늘 푼 문제를 다시 살펴봐도 좋아요.</p>`;
+  } else {
+    const pr = P[p.next], started = st.drafts?.[pid(g, p.next)];
+    todayHtml = `<span class="pill o">Day ${p.next + 1} · ${weekOf(p.next)}주차 · ${esc(WEEK_TOPICS[g][weekOf(p.next) - 1])}</span>
+      <h2 style="margin:6px 0">오늘의 문제가 도착했어요</h2>
+      <p class="muted small" style="margin:0 0 12px">정답을 보기 전에, 내 생각을 먼저 남겨요.</p>
+      <button class="btn" data-open="${p.next}">${started ? '이어서 풀기' : '오늘의 문제 시작하기'} →</button>`;
+  }
+  const cells = [];
+  for (let w = 0; w < 4; w++) {
+    cells.push(`<div class="wk">${w + 1}주</div>`);
+    for (let d = 0; d < 5; d++) {
+      const i = w * 5 + d, r = p.recs[pid(g, i)];
+      let cls = 'day', ic = '';
+      if (r?.done) { cls += ' done'; ic = '🌿'; }
+      else if (r?.cert) { cls += ' half'; ic = '🌱'; }
+      else if (i === p.next && !p.locked) { cls += ' now'; ic = '✏️'; }
+      else { cls += ' lock'; ic = '·'; }
+      cells.push(`<button class="${cls}" data-day="${i}" ${r?.cert || (i === p.next && !p.locked) ? '' : 'disabled'}><span class="n">${i + 1}</span><span class="ic">${ic}</span></button>`);
+    }
+  }
+  app.innerHTML = `
+  <section class="card today">
+    <div style="text-align:center">${plant(stageOf(p.certCount), 110)}<div class="small muted">${STAGE_NAMES[stageOf(p.certCount)]}</div></div>
+    <div><p class="small muted" style="margin:0">${esc(st.name)}, 오늘도 생각의 씨앗을 심어요</p>${todayHtml}</div>
+  </section>
+  <div class="stats">
+    <div class="stat"><b>${p.certCount}<small style="font-size:14px">/20</small></b><span>생각 기록</span></div>
+    <div class="stat"><b>${p.streak}일</b><span>연속 도전</span></div>
+    <div class="stat"><b>${p.first}</b><span>한 번에 해결</span></div>
+    <div class="stat"><b>${Math.round(p.secs / 60)}분</b><span>생각한 시간</span></div>
+  </div>
+  <section class="card" style="margin-top:14px">
+    <div class="row between"><h2 style="margin:0;font-size:21px">4주 생각 달력</h2><span class="small muted">🌿 완료 · 🌱 비교 남음 · ✏️ 오늘</span></div>
+    <div class="cal">${cells.join('')}</div>
+    <p class="small muted" style="margin:10px 0 0">기록한 날을 누르면 내 풀이와 모범 풀이를 다시 볼 수 있어요.</p>
+  </section>`;
+  $$('[data-open]').forEach(b => b.onclick = () => go('solve', { i: +b.dataset.open }));
+  $$('[data-day]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.day, r = p.recs[pid(g, i)];
+    if (r?.cert && r.done) go('review', { i, sid: st.id, back: 'dash' });
+    else go('solve', { i });
+  });
+  const cb = $('#certBtn'); if (cb) cb.onclick = () => finishCard(st);
+}
+
+/* ================= 문제 풀기 ================= */
+const STEP_NAMES = ['문제 읽기', '혼자 생각', '식과 답', '풀이 인증', '모범 풀이', '다시 보기'];
+const THINK_SEC = 15 * 60, HINT_SEC = 3 * 60;
+
+function vSolve() {
+  const st = student(); if (!st) return go('home');
+  const g = st.grade, i = view.i, P = probs(g), pr = P[i], id = pid(g, i);
+  if (!pr) return go('dash');
+  st.drafts = st.drafts || {}; st.recs = st.recs || {};
+  const rec = st.recs[id];
+  // 열 수 있는지 확인
+  const p = progress(st);
+  if (!rec?.cert && (i !== p.next || p.locked)) { toast('아직 열리지 않은 문제예요.'); return go('dash'); }
+  let d = st.drafts[id];
+  if (!d) {
+    d = st.drafts[id] = { step: 1, marks: {}, ask: '', eq: '', ans: pr.a.map(() => ''), tries: 0, hint: false, secs: 0, tpl: VIZ.template(pr), drawn: false, photo: false, start: today() };
+    save();
+  }
+  if (rec?.cert && d.step < 5) d.step = 5;
+  if (rec?.cert && !d.cert) d.cert = true;
+  const key = `${st.id}/${id}`;
+
+  // 타이머: 화면이 열려 있는 동안 생각한 시간 기록 (인증 전까지)
+  let tick = null;
+  if (!rec?.cert) {
+    tick = setInterval(() => {
+      if (document.hidden) return;
+      d.secs++;
+      if (d.secs % 10 === 0) save();
+      const t = $('#tmr');
+      if (t) {
+        const left = Math.max(0, THINK_SEC - d.secs);
+        t.querySelector('b').textContent = left ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}` : '15분 ✔';
+        t.querySelector('i').style.width = `${Math.min(100, d.secs / THINK_SEC * 100)}%`;
+        const hb = $('#hintBtn');
+        if (hb && !d.hint) {
+          const wait = HINT_SEC - d.secs;
+          hb.disabled = wait > 0;
+          hb.textContent = wait > 0 ? `💡 힌트 (${Math.ceil(wait / 60)}분 뒤)` : '💡 힌트 보기';
+        }
+      }
+    }, 1000);
+  }
+  let pad = null;
+  cleanup = () => { clearInterval(tick); if (pad) pad.persist(); save(); };
+
+  const head = () => `
+    <div class="qhead"><button class="btn line sm" id="backDash">← 달력</button>
+      <span class="pill o">Day ${i + 1}</span><span class="pill">${weekOf(i)}주차 · ${esc(WEEK_TOPICS[g][weekOf(i) - 1])}</span></div>
+    <nav class="stepper">${STEP_NAMES.map((n, k) => {
+      const s = k + 1, ok = s < d.step || (d.cert && s <= 4) || (rec?.done && s <= 6);
+      const can = d.cert ? s >= 5 || s === 4 : s <= d.step;
+      return `<button data-step="${s}" class="${s === d.step ? 'on' : ''} ${ok && s !== d.step ? 'ok' : ''}" ${can ? '' : 'disabled'}><span class="dot">${ok && s !== d.step ? '✓' : s}</span>${n}</button>`;
+    }).join('')}</nav>`;
+
+  const probHTML = (interactive) => {
+    const toks = pr.t.match(/\d+ \d+\/\d+|\S+/g);
+    return `<div class="ptext">${toks.map((w, k) => `<span class="tok ${d.marks[k] || ''}" data-k="${k}">${frac(w)}</span>`).join(' ')}</div>`;
+  };
+
+  function draw() {
+    if (pad) { pad.persist(); pad = null; }
+    app.innerHTML = head() + `<div id="stepBody"></div>`;
+    $('#backDash').onclick = () => go('dash');
+    $$('[data-step]').forEach(b => b.onclick = () => { d.step = +b.dataset.step; save(); draw(); window.scrollTo({ top: 0 }); });
+    const body = $('#stepBody');
+    [, step1, step2, step3, step4, step5, step6][d.step](body);
+  }
+  const nextStep = () => { d.step++; save(); draw(); window.scrollTo({ top: 0 }); };
+
+  /* 1. 문제 읽기 */
+  function step1(body) {
+    let marker = 'k';
+    body.innerHTML = `
+    <section class="card">
+      <h2 style="margin:0 0 4px">① 오늘의 문제를 천천히 읽어요</h2>
+      <p class="muted small" style="margin:0">형광펜을 고르고 낱말을 눌러 표시해요.</p>
+      <div class="markers">
+        <button class="mk-k on" data-m="k">🖍 알고 있는 것</button>
+        <button class="mk-f" data-m="f">🖍 구하는 것</button>
+        <button data-m="">지우개</button>
+      </div>
+      <div class="card" style="background:var(--bg);box-shadow:none">${probHTML(true)}</div>
+      <label style="display:block;margin-top:16px"><b>무엇을 구하는 문제인가요?</b> <span class="small muted">내 말로 짧게 써요</span>
+        <input id="ask" maxlength="60" placeholder="예) 지금 버스에 타고 있는 사람 수" value="${esc(d.ask)}" style="margin-top:6px"></label>
+      <div class="row end" style="margin-top:16px"><button class="btn" id="go2">혼자 생각하러 가기 →</button></div>
+    </section>`;
+    $$('[data-m]', body).forEach(b => b.onclick = () => { marker = b.dataset.m; $$('[data-m]', body).forEach(x => x.classList.toggle('on', x === b)); });
+    $$('.tok', body).forEach(t => t.onclick = () => {
+      const k = t.dataset.k;
+      if (!marker || d.marks[k] === marker) delete d.marks[k]; else d.marks[k] = marker;
+      t.className = `tok ${d.marks[k] || ''}`; save();
+    });
+    $('#ask', body).oninput = e => { d.ask = e.target.value; save(); };
+    $('#go2', body).onclick = () => {
+      const marks = Object.values(d.marks);
+      if (!marks.includes('k') || !marks.includes('f')) return toast('알고 있는 것과 구하는 것을 하나 이상씩 표시해 주세요.');
+      if (d.ask.trim().length < 2) { $('#ask', body).focus(); return toast('무엇을 구하는지 써 주세요.'); }
+      nextStep();
+    };
+  }
+
+  /* 2. 혼자 생각하기 */
+  function step2(body) {
+    const left = Math.max(0, THINK_SEC - d.secs);
+    const rec2 = VIZ.template(pr);
+    const TPL = [['blank', '빈 종이'], ['grid', '모눈'], ['line', '수직선'], ['tape', '막대'], ['table', '표']];
+    body.innerHTML = `
+    <section class="card">
+      <details><summary class="small muted" style="cursor:pointer">문제 다시 보기</summary><div style="margin-top:8px">${probHTML(false)}</div>
+        <p class="small" style="margin:6px 0 0">구하는 것: <b>${esc(d.ask)}</b></p></details>
+      <div class="timer" id="tmr" style="margin-top:12px"><span>⏱</span><div class="bar"><i style="width:${Math.min(100, d.secs / THINK_SEC * 100)}%"></i></div><b>${left ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}` : '15분 ✔'}</b></div>
+      <h2 style="margin:14px 0 4px">② 15분, 먼저 혼자 생각해요</h2>
+      <p class="muted small" style="margin:0 0 10px">그림·수직선·막대·표로 생각을 꺼내 보세요. 수와 관계를 그림에 써 넣으면 더 좋아요.</p>
+      <div class="tpls">${TPL.map(([k, n]) => `<button data-tpl="${k}" class="${d.tpl === k ? 'on' : ''}">${n}${k === rec2 ? ' ⭐' : ''}</button>`).join('')}</div>
+      <div class="tools">
+        ${['#2f2a24', '#d9534f', '#3f7fc4', '#4e8a3a', '#e08a1e'].map((c, k) => `<button class="sw ${k === 0 ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="색"></button>`).join('')}
+        <span class="sep"></span>
+        <button data-tool="pen" class="on" title="펜">✏️</button>
+        <button data-tool="line" title="곧은 선">📏</button>
+        <button data-tool="rect" title="네모">▭</button>
+        <button data-tool="erase" title="지우개">🧽</button>
+        <button data-w title="굵기">굵게</button>
+        <span class="sep"></span>
+        <button id="undo" title="되돌리기">↶</button>
+        <button id="clear" title="모두 지우기">🗑</button>
+      </div>
+      <div class="pad" id="pad"><canvas id="bg" width="1000" height="700"></canvas><canvas id="ink" width="1000" height="700"></canvas></div>
+      <p class="small muted" style="margin:6px 0 0">⭐는 이 문제에 추천하는 바탕이에요. 공책에 풀었다면 사진으로 올려도 돼요.</p>
+      <div class="row" style="margin-top:10px">
+        <label class="btn ghost sm" style="cursor:pointer">📷 공책 사진 올리기<input type="file" accept="image/*" id="photoIn" hidden></label>
+        <button class="btn ghost sm" id="hintBtn" ${d.hint ? '' : 'disabled'}>💡 힌트</button>
+      </div>
+      <div class="photo" id="photoBox"></div>
+      <div id="hintBox">${d.hint ? `<div class="hint">💡 ${frac(pr.h)}</div>` : ''}</div>
+      <div class="row between" style="margin-top:16px"><button class="btn line" id="b1">← 문제 읽기</button><button class="btn" id="go3">식 세우러 가기 →</button></div>
+    </section>`;
+    pad = makePad($('#pad', body), key, d, () => save());
+    $$('[data-tpl]', body).forEach(b => b.onclick = () => { d.tpl = b.dataset.tpl; $$('[data-tpl]', body).forEach(x => x.classList.toggle('on', x === b)); pad.bg(d.tpl); save(); });
+    $$('[data-c]', body).forEach(b => b.onclick = () => { pad.color = b.dataset.c; if (pad.tool === 'erase') setTool('pen'); $$('[data-c]', body).forEach(x => x.classList.toggle('on', x === b)); });
+    const setTool = t => { pad.tool = t; $$('[data-tool]', body).forEach(x => x.classList.toggle('on', x.dataset.tool === t)); };
+    $$('[data-tool]', body).forEach(b => b.onclick = () => setTool(b.dataset.tool));
+    $('[data-w]', body).onclick = e => { pad.width = pad.width === 4 ? 8 : 4; e.target.textContent = pad.width === 4 ? '굵게' : '가늘게'; };
+    $('#undo', body).onclick = () => pad.undo();
+    $('#clear', body).onclick = () => { if (confirm('그림을 모두 지울까요?')) pad.clear(); };
+    const hb = $('#hintBtn', body);
+    if (!d.hint) { const w = HINT_SEC - d.secs; hb.disabled = w > 0; hb.textContent = w > 0 ? `💡 힌트 (${Math.ceil(w / 60)}분 뒤)` : '💡 힌트 보기'; }
+    else hb.textContent = '💡 힌트 봤어요';
+    hb.onclick = () => { if (d.hint) return; d.hint = true; save(); hb.textContent = '💡 힌트 봤어요'; $('#hintBox', body).innerHTML = `<div class="hint">💡 ${frac(pr.h)}</div>`; };
+    const showPhoto = async () => {
+      const box = $('#photoBox', body);
+      if (!d.photo) { box.innerHTML = ''; return; }
+      const src = await IMG.get(key + '/photo');
+      box.innerHTML = src ? `<img src="${src}" alt="공책 사진"><button class="btn line sm" id="rmPhoto" style="margin-top:6px">사진 빼기</button>` : '';
+      const rm = $('#rmPhoto', box); if (rm) rm.onclick = async () => { await IMG.del(key + '/photo'); d.photo = false; save(); showPhoto(); };
+    };
+    showPhoto();
+    $('#photoIn', body).onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try { await IMG.set(key + '/photo', await shrink(f, 1200)); d.photo = true; save(); showPhoto(); }
+      catch (err) { toast('사진을 불러오지 못했어요.'); }
+    };
+    $('#b1', body).onclick = () => { d.step = 1; save(); draw(); };
+    $('#go3', body).onclick = () => {
+      if (!pad.drawn && !d.photo) return toast('그림이나 사진으로 내 생각을 먼저 남겨 주세요.');
+      nextStep();
+    };
+  }
+
+  /* 3. 식과 답 */
+  async function step3(body) {
+    const tries = d.tries;
+    body.innerHTML = `
+    <section class="card">
+      <h2 style="margin:0 0 4px">③ 그림을 보고 식으로 연결해요</h2>
+      <div class="mini" style="margin:8px 0 12px">${frac(pr.t)}</div>
+      <div id="myPic"></div>
+      <label style="display:block;margin-top:12px"><b>식</b> <span class="small muted">생각한 순서대로 한 줄씩</span>
+        <textarea id="eq" rows="3" placeholder="예) 42 − 15 = 27&#10;27 + 8 = 35" style="margin-top:6px">${esc(d.eq)}</textarea></label>
+      <div style="margin-top:12px"><b>답</b>
+        <div class="ansrow" style="margin-top:6px">${pr.a.map(([v, u], k) => `<label><input data-a="${k}" value="${esc(d.ans[k] || '')}" inputmode="${isFracAns(v) ? 'text' : 'decimal'}" placeholder="${isFracAns(v) ? '3/8' : '?'}" ${d.solved ? 'disabled' : ''}><span>${esc(u)}</span></label>`).join('')}</div>
+        ${pr.a.some(([v]) => isFracAns(v)) ? '<p class="small muted" style="margin:4px 0 0">분수는 3/8, 대분수는 2 3/8 처럼 써요.</p>' : ''}
+      </div>
+      <div id="fb"></div>
+      <div class="row between" style="margin-top:16px"><button class="btn line" id="b2">← 그림 고치기</button>
+        <span class="row"><button class="btn ${d.solved ? 'hidden' : ''}" id="check">확인하기</button><button class="btn ${d.solved ? '' : 'hidden'}" id="go4">풀이 인증하기 →</button></span></div>
+    </section>`;
+    const src = d.photo ? await IMG.get(key + '/photo') : await mergedDrawing(key, d.tpl);
+    if (src) $('#myPic', body).innerHTML = `<details open><summary class="small muted">내 그림</summary><img src="${src}" alt="내 그림" style="width:100%;max-width:420px;border-radius:12px;border:1px solid var(--line);margin-top:6px;background:#fff"></details>`;
+    $('#eq', body).oninput = e => { d.eq = e.target.value; save(); };
+    $$('[data-a]', body).forEach(inp => inp.oninput = () => { d.ans[+inp.dataset.a] = inp.value; save(); });
+    const fb = $('#fb', body);
+    const showFb = () => {
+      if (!d.solved) return;
+      fb.innerHTML = d.correct
+        ? `<div class="feedback ok">🎉 <b>정답이에요!</b> ${d.tries === 1 ? '한 번에 해결했어요.' : '다시 생각해서 찾아냈어요. 멋져요!'}</div>`
+        : `<div class="feedback no">괜찮아요! 정답보다 <b>생각한 과정</b>이 더 중요해요.<br>지금까지의 생각을 인증하고, 모범 풀이와 비교해 봐요.</div>`;
+    };
+    showFb();
+    $('#b2', body).onclick = () => { d.step = 2; save(); draw(); };
+    $('#check', body).onclick = () => {
+      if (d.eq.trim().length < 3) { $('#eq', body).focus(); return toast('식을 먼저 써 주세요.'); }
+      if (pr.a.some((_, k) => !String(d.ans[k] || '').trim())) return toast('답 칸을 모두 채워 주세요.');
+      const bad = pr.a.findIndex((_, k) => isNaN(parseNum(d.ans[k])));
+      if (bad >= 0) return toast('답은 숫자로 써 주세요.');
+      const ok = pr.a.every(([v], k) => Math.abs(parseNum(d.ans[k]) - parseNum(v)) < 1e-6);
+      d.tries++;
+      if (ok || d.tries >= 2) {
+        d.solved = true; d.correct = ok; save();
+        $('#check', body).classList.add('hidden'); $('#go4', body).classList.remove('hidden');
+        $$('[data-a]', body).forEach(x => x.disabled = true);
+        showFb();
+      } else {
+        save();
+        fb.innerHTML = `<div class="feedback no">🤔 <b>다시 한 번 생각해 볼까요?</b><br>구하는 것이 “${esc(d.ask)}” 맞나요? 그림 속 수와 관계를 하나씩 확인해 보세요. (기회 1번 더)</div>`;
+      }
+    };
+    $('#go4', body).onclick = nextStep;
+  }
+
+  /* 4. 풀이 인증 */
+  async function step4(body) {
+    if (!d.cert) {
+      body.innerHTML = `<section class="card" style="text-align:center">
+        <h2 style="margin:0 0 6px">④ 내 생각을 인증해요</h2>
+        <p class="muted" style="margin:0 0 14px">인증하면 내 풀이가 저장되고, 모범 풀이가 열려요.<br><b>인증한 뒤에는 내 풀이를 고칠 수 없어요.</b></p>
+        <div class="mini" style="text-align:left">구하는 것: <b>${esc(d.ask)}</b><br>식: ${esc(d.eq).replace(/\n/g, ' / ')}<br>답: ${pr.a.map(([, u], k) => esc(d.ans[k]) + esc(u)).join(' ')}</div>
+        <div class="row" style="justify-content:center;margin-top:16px"><button class="btn line" id="b3">← 다시 보기</button><button class="btn warm" id="certify">🌱 풀이 인증하기</button></div>
+      </section>`;
+      $('#b3', body).onclick = () => { d.step = 3; save(); draw(); };
+      $('#certify', body).onclick = async () => {
+        $('#certify', body).disabled = true;
+        if (pad) { await pad.persist(); }
+        const merged = await mergedDrawing(key, d.tpl, 'image/jpeg');
+        if (merged) await IMG.set(key + '/draw', merged);
+        st.recs[id] = { grade: g, i, date: today(), ask: d.ask, marks: d.marks, eq: d.eq, ans: d.ans, correct: !!d.correct, tries: d.tries, hint: d.hint, secs: d.secs, photo: d.photo, drawn: d.drawn, cert: true, done: false };
+        d.cert = true; save();
+        clearInterval(tick);
+        step4(body); draw();
+      };
+      return;
+    }
+    const r = st.recs[id];
+    body.innerHTML = `<section class="card">
+      <h2 style="margin:0 0 4px">④ 풀이 인증 완료 🌱</h2>
+      <p class="muted small" style="margin:0 0 12px">인증 카드를 저장해서 선생님께 보내 주세요.</p>
+      <div id="cardBox" class="muted small">카드를 만드는 중…</div>
+      <div class="row" style="margin-top:12px"><button class="btn ghost" id="saveCard">⬇️ 카드 저장</button><button class="btn ghost hidden" id="shareCard">📤 보내기</button>
+        <span class="sp" style="flex:1"></span><button class="btn" id="go5">모범 풀이 보기 →</button></div>
+    </section>`;
+    const url = await makeCard(st, pr, i, r);
+    $('#cardBox', body).innerHTML = `<img class="cardimg" src="${url}" alt="풀이 인증 카드">`;
+    wireCard(body, url, `${st.name}_Day${i + 1}_인증.png`);
+    $('#go5', body).onclick = () => { d.step = 5; save(); draw(); window.scrollTo({ top: 0 }); };
+  }
+
+  /* 5. 모범 풀이 */
+  function step5(body) {
+    let shown = d.shown || 1;
+    const parts = modelParts(pr);
+    const paint = () => {
+      body.innerHTML = `<section class="card model">
+        <h2 style="margin:0 0 4px">⑤ 선생님의 시각화 풀이</h2>
+        <p class="muted small" style="margin:0">한 단계씩 열어 보며, 내 생각과 어디가 같고 다른지 살펴봐요.</p>
+        <div class="mini" style="margin-top:10px">${frac(pr.t)}</div>
+        ${parts.slice(0, shown).join('')}
+        <div class="row between" style="margin-top:14px">
+          ${shown < parts.length ? `<button class="btn line" id="all">모두 보기</button><button class="btn" id="more">다음 단계 보기 (${shown}/${parts.length})</button>`
+            : `<span></span><button class="btn" id="go6">내 생각 다시 살펴보기 →</button>`}
+        </div></section>`;
+      const m = $('#more', body); if (m) m.onclick = () => { shown++; d.shown = shown; save(); paint(); };
+      const a = $('#all', body); if (a) a.onclick = () => { shown = parts.length; d.shown = shown; save(); paint(); };
+      const n = $('#go6', body); if (n) n.onclick = () => { d.step = 6; save(); draw(); window.scrollTo({ top: 0 }); };
+    };
+    paint();
+  }
+
+  /* 6. 다시 살펴보기 */
+  async function step6(body) {
+    const r = st.recs[id];
+    d.checks = d.checks || [false, false, false];
+    const CH = ['구하는 것을 먼저 찾고 시작했어요', '그림에 수와 관계를 써 넣었어요', '그림을 보고 식을 세웠어요'];
+    const SELF = ['거의 같았어요', '조금 달랐어요', '많이 달랐어요'];
+    body.innerHTML = `<section class="card">
+      <h2 style="margin:0 0 4px">⑥ 내 생각 다시 살펴보기</h2>
+      <p class="muted small" style="margin:0 0 12px">처음의 내 생각과 모범 풀이를 나란히 놓고 비교해요.</p>
+      <div class="cmp"><div><div class="small muted">내 생각</div><div id="mine" class="muted small">…</div></div>
+        <div><div class="small muted">모범 풀이</div>${pr.viz.map(v => VIZ.render(v)).join('')}<div class="eq small">${pr.eq.map(frac).join('<br>')}</div></div></div>
+      <h3 style="margin:18px 0 4px">이번 풀이에서 나는…</h3>
+      <div class="checks">${CH.map((c, k) => `<label><input type="checkbox" data-ch="${k}" ${d.checks[k] ? 'checked' : ''} ${r.done ? 'disabled' : ''}>${c}</label>`).join('')}</div>
+      <h3 style="margin:18px 0 6px">내 생각과 모범 풀이는</h3>
+      <div class="seg">${SELF.map((s, k) => `<button data-self="${k}" class="${d.self === k ? 'on' : ''}" ${r.done ? 'disabled' : ''}>${s}</button>`).join('')}</div>
+      <label style="display:block;margin-top:16px"><b>새로 알게 된 점, 다음에 해 볼 것</b>
+        <textarea id="note" rows="3" maxlength="200" placeholder="예) 나무는 간격보다 1그루 더 많다는 걸 알았다. 다음엔 그림부터 그려야지!" style="margin-top:6px" ${r.done ? 'disabled' : ''}>${esc(d.note || r.note || '')}</textarea></label>
+      <div class="row end" style="margin-top:16px">${r.done ? `<button class="btn" id="toDash">달력으로</button>` : `<button class="btn warm" id="finish">오늘의 생각 마무리 🌿</button>`}</div>
+    </section>`;
+    const src = r.photo ? await IMG.get(key + '/photo') : await IMG.get(key + '/draw');
+    $('#mine', body).innerHTML = src ? `<img src="${src}" alt="내 그림">` : '그림이 없어요';
+    if (r.eq) $('#mine', body).insertAdjacentHTML('beforeend', `<div class="eq small">${esc(r.eq).replace(/\n/g, '<br>')}</div>`);
+    $$('[data-ch]', body).forEach(c => c.onchange = () => { d.checks[+c.dataset.ch] = c.checked; save(); });
+    $$('[data-self]', body).forEach(b => b.onclick = () => { d.self = +b.dataset.self; $$('[data-self]', body).forEach(x => x.classList.toggle('on', x === b)); save(); });
+    const note = $('#note', body); if (note) note.oninput = () => { d.note = note.value; save(); };
+    const td = $('#toDash', body); if (td) td.onclick = () => go('dash');
+    const fin = $('#finish', body);
+    if (fin) fin.onclick = () => {
+      if (d.self == null) return toast('내 생각과 모범 풀이가 얼마나 비슷했는지 골라 주세요.');
+      if ((d.note || '').trim().length < 5) { note.focus(); return toast('알게 된 점을 한 줄(5글자 이상) 써 주세요.'); }
+      Object.assign(r, { checks: d.checks, self: d.self, note: d.note.trim(), done: true, doneDate: today() });
+      delete st.drafts[id]; save();
+      const n = progress(st).certCount;
+      go('dash');
+      overlay(`${plant(stageOf(n), 130)}<div class="stamp">Day ${i + 1} 완료!</div>
+        <p style="margin:0 0 4px">${n === 20 ? '4주 챌린지 완주! 🎉' : `내 새싹이 <b>${STAGE_NAMES[stageOf(n)]}</b> 단계예요.`}</p>
+        <p class="muted small hand" style="font-size:19px;margin:0 0 14px">정답을 맞히는 아이가 아니라,<br>스스로 생각하는 아이로 자라요.</p>
+        <button class="btn" data-x>좋아요!</button>`);
+    };
+  }
+
+  draw();
+}
+
+function modelParts(pr) {
+  const num = n => `<span class="num">${n}</span>`;
+  const parts = [];
+  parts.push(`<div class="stp"><h3>${num(1)} 문제 이해하기</h3>
+    <div><b class="small hl-g">알고 있는 것</b><ul>${pr.k.map(x => `<li>${frac(x)}</li>`).join('')}</ul>
+    <b class="small hl-o">구하는 것</b><ul><li>${frac(pr.f)}</li></ul></div></div>`);
+  pr.viz.forEach((v, k) => parts.push(`<div class="stp"><h3>${num(k + 2)} ${VIZ.name(v)}</h3>${v.cap ? `<div class="vcap">${esc(v.cap)}</div>` : ''}${VIZ.render(v)}</div>`));
+  parts.push(`<div class="stp"><h3>${num(pr.viz.length + 2)} 식으로 해결하기</h3>
+    <div class="eq">${pr.eq.map(frac).join('<br>')}</div>
+    <div style="margin-top:8px"><span class="ans-badge">답 ${pr.a.map(([v, u]) => frac(String(v)) + esc(u)).join(' ')}</span></div>
+    <div class="tip">${plant(1, 40)}<div class="hand">${frac(pr.tip)}</div></div></div>`);
+  return parts;
+}
+
+/* ================= 그림판 ================= */
+function makePad(el, key, d, onChange) {
+  const bg = $('#bg', el), ink = $('#ink', el);
+  const bc = bg.getContext('2d'), c = ink.getContext('2d');
+  const W = 1000, H = 700;
+  const P = { tool: 'pen', color: '#2f2a24', width: 4, drawn: !!d.drawn };
+  const undo = [];
+  let drawing = false, last = null, startPt = null, snap = null, dirtySave = null;
+  drawTemplate(bc, d.tpl);
+  IMG.get(key + '/ink').then(src => {
+    if (!src) return;
+    const im = new Image(); im.onload = () => c.drawImage(im, 0, 0, W, H); im.src = src;
+  });
+  const pt = e => { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; };
+  const style = () => {
+    c.globalCompositeOperation = P.tool === 'erase' ? 'destination-out' : 'source-over';
+    c.strokeStyle = P.color; c.lineWidth = P.tool === 'erase' ? 34 : P.width; c.lineCap = 'round'; c.lineJoin = 'round';
+  };
+  ink.addEventListener('pointerdown', e => {
+    e.preventDefault(); ink.setPointerCapture(e.pointerId);
+    undo.push(c.getImageData(0, 0, W, H)); if (undo.length > 25) undo.shift();
+    drawing = true; last = startPt = pt(e); style();
+    if (P.tool === 'line' || P.tool === 'rect') snap = c.getImageData(0, 0, W, H);
+    else { c.beginPath(); c.arc(last.x, last.y, c.lineWidth / 2, 0, 7); c.fillStyle = P.color; if (P.tool !== 'erase') c.fill(); else { c.fill(); } }
+  });
+  ink.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pt(e);
+    if (P.tool === 'line' || P.tool === 'rect') {
+      c.putImageData(snap, 0, 0); style(); c.beginPath();
+      if (P.tool === 'line') {
+        let { x, y } = p;
+        if (Math.abs(y - startPt.y) < 18) y = startPt.y; // 거의 수평이면 수평으로
+        if (Math.abs(x - startPt.x) < 18) x = startPt.x;
+        c.moveTo(startPt.x, startPt.y); c.lineTo(x, y);
+      } else c.rect(startPt.x, startPt.y, p.x - startPt.x, p.y - startPt.y);
+      c.stroke();
+    } else {
+      c.beginPath(); c.moveTo(last.x, last.y); c.lineTo(p.x, p.y); c.stroke(); last = p;
+    }
+  });
+  const end = () => {
+    if (!drawing) return; drawing = false; snap = null;
+    if (P.tool !== 'erase') { P.drawn = true; d.drawn = true; }
+    clearTimeout(dirtySave); dirtySave = setTimeout(() => P.persist(), 800);
+    onChange();
+  };
+  ink.addEventListener('pointerup', end); ink.addEventListener('pointercancel', end);
+  P.undo = () => { const im = undo.pop(); if (im) { c.putImageData(im, 0, 0); P.persist(); } };
+  P.clear = () => { undo.push(c.getImageData(0, 0, W, H)); c.clearRect(0, 0, W, H); P.drawn = false; d.drawn = false; P.persist(); onChange(); };
+  P.bg = tpl => drawTemplate(bc, tpl);
+  P.persist = () => { clearTimeout(dirtySave); return IMG.set(key + '/ink', ink.toDataURL('image/png')); };
+  return P;
+}
+function drawTemplate(ctx, tpl) {
+  const W = 1000, H = 700;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#cfd8c2'; ctx.fillStyle = '#b7c2a8'; ctx.lineWidth = 2; ctx.font = '22px sans-serif';
+  if (tpl === 'grid') {
+    ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = 0; x <= W; x += 40) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let y = 0; y <= H; y += 40) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+  } else if (tpl === 'line') {
+    for (const y of [330, 580]) {
+      ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(950, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(950, y); ctx.lineTo(934, y - 9); ctx.lineTo(934, y + 9); ctx.closePath(); ctx.fill();
+      ctx.lineWidth = 2;
+      for (let x = 90; x <= 910; x += 82) { ctx.beginPath(); ctx.moveTo(x, y - 12); ctx.lineTo(x, y + 12); ctx.stroke(); }
+    }
+  } else if (tpl === 'tape') {
+    ctx.setLineDash([10, 8]);
+    for (const y of [130, 300, 470]) { ctx.strokeRect(40, y, 120, 70); ctx.strokeRect(190, y, 760, 70); }
+    ctx.setLineDash([]);
+  } else if (tpl === 'table') {
+    const X = 60, Y = 200, cw = 125, rh = 90, cols = 7, rows = 3;
+    ctx.strokeRect(X, Y, cw * cols + 30, rh * rows);
+    ctx.beginPath();
+    for (let r = 1; r < rows; r++) { ctx.moveTo(X, Y + r * rh); ctx.lineTo(X + cw * cols + 30, Y + r * rh); }
+    for (let k = 1; k < cols; k++) { const x = X + 30 + k * cw; ctx.moveTo(x, Y); ctx.lineTo(x, Y + rh * rows); }
+    ctx.stroke();
+    ctx.fillStyle = '#eef3e6'; ctx.globalCompositeOperation = 'destination-over'; ctx.fillRect(X, Y, cw + 30, rh * rows); ctx.globalCompositeOperation = 'source-over';
+  }
+}
+async function mergedDrawing(key, tpl, type = 'image/png') {
+  const src = await IMG.get(key + '/ink');
+  if (!src) return null;
+  const cv = document.createElement('canvas'); cv.width = 1000; cv.height = 700;
+  const ctx = cv.getContext('2d'); drawTemplate(ctx, tpl);
+  const im = await loadImg(src); ctx.drawImage(im, 0, 0);
+  return cv.toDataURL(type, 0.82);
+}
+const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+async function shrink(file, max) {
+  const url = URL.createObjectURL(file);
+  try {
+    const im = await loadImg(url);
+    const s = Math.min(1, max / Math.max(im.width, im.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+    cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+    return cv.toDataURL('image/jpeg', 0.8);
+  } finally { URL.revokeObjectURL(url); }
+}
+
+/* ================= 인증 카드 ================= */
+function wrap(ctx, text, maxW) {
+  const lines = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(' ')) {
+      const t = line ? line + ' ' + word : word;
+      if (ctx.measureText(t).width <= maxW) { line = t; continue; }
+      if (line) lines.push(line);
+      if (ctx.measureText(word).width <= maxW) { line = word; continue; }
+      line = '';
+      for (const ch of word) { if (ctx.measureText(line + ch).width > maxW) { lines.push(line); line = ch; } else line += ch; }
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+async function makeCard(st, pr, i, r) {
+  const allText = [pr.t, r.ask, r.eq, st.name, '시각화 챌린지 풀이 인증 구하는 것 식 답 한 번에 해결 다시 생각해서 생각 과정 인증 생각한 시간 분 힌트 사용 Day 주차 초', ...pr.a.map(a => a[1]), ...(r.ans || [])].join(' ');
+  try { await Promise.all([document.fonts.load('30px "Gowun Dodum"', allText), document.fonts.load('30px Jua', allText), document.fonts.load('bold 30px Gaegu', '정답을 보기 전에, 내 생각이 먼저 남았어요.')]); } catch (e) { }
+  const key = `${st.id}/${pid(st.grade, i)}`;
+  const src = r.photo ? await IMG.get(key + '/photo') : await IMG.get(key + '/draw');
+  const im = src ? await loadImg(src).catch(() => null) : null;
+  const W = 1080, PAD = 70, IW = W - PAD * 2;
+  const cv = document.createElement('canvas'); const ctx = cv.getContext('2d');
+  const body = '"Gowun Dodum", sans-serif', head = 'Jua, sans-serif';
+  ctx.font = `30px ${body}`;
+  const pLines = wrap(ctx, pr.t, IW - 40);
+  const eqLines = wrap(ctx, r.eq || '', IW - 40);
+  const imH = im ? Math.min(700, im.height * IW / im.width) : 0;
+  const H = 230 + pLines.length * 46 + 70 + 90 + (im ? imH + 40 : 0) + 60 + eqLines.length * 44 + 160 + 110;
+  cv.width = W; cv.height = H;
+  ctx.fillStyle = '#f6f0e6'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#fffdf8'; rr(ctx, 30, 30, W - 60, H - 60, 40); ctx.fill();
+  let y = 110;
+  ctx.fillStyle = '#5b7342'; ctx.font = `46px ${head}`; ctx.fillText('🌱 시각화 챌린지 · 풀이 인증', PAD, y);
+  y += 54; ctx.fillStyle = '#7d7266'; ctx.font = `28px ${body}`;
+  ctx.fillText(`${st.name} · 초${st.grade} · Day ${i + 1} (${weekOf(i)}주차) · ${r.date.replace(/-/g, '.')}`, PAD, y);
+  y += 36;
+  ctx.fillStyle = '#f6f0e6'; rr(ctx, PAD, y, IW, pLines.length * 46 + 40, 24); ctx.fill();
+  ctx.fillStyle = '#2f2a24'; ctx.font = `30px ${body}`;
+  pLines.forEach((l, k) => ctx.fillText(l, PAD + 20, y + 52 + k * 46));
+  y += pLines.length * 46 + 40 + 60;
+  ctx.fillStyle = '#d9774a'; ctx.font = `28px ${head}`; ctx.fillText('구하는 것', PAD, y);
+  ctx.fillStyle = '#2f2a24'; ctx.font = `30px ${body}`; ctx.fillText(r.ask, PAD + 140, y);
+  y += 40;
+  if (im) {
+    ctx.save(); rr(ctx, PAD, y, IW, imH, 20); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillRect(PAD, y, IW, imH);
+    const s = Math.min(IW / im.width, imH / im.height); const dw = im.width * s, dh = im.height * s;
+    ctx.drawImage(im, PAD + (IW - dw) / 2, y + (imH - dh) / 2, dw, dh); ctx.restore();
+    ctx.strokeStyle = '#ece2d2'; ctx.lineWidth = 3; rr(ctx, PAD, y, IW, imH, 20); ctx.stroke();
+    y += imH + 40;
+  }
+  y += 20;
+  ctx.fillStyle = '#5b7342'; ctx.font = `30px ${head}`; ctx.fillText('식', PAD, y);
+  ctx.fillStyle = '#2f2a24'; ctx.font = `30px ${body}`;
+  eqLines.forEach((l, k) => ctx.fillText(l, PAD + 60, y + k * 44));
+  y += eqLines.length * 44 + 30;
+  ctx.fillStyle = '#5b7342'; ctx.font = `30px ${head}`; ctx.fillText('답', PAD, y + 34);
+  const ansText = pr.a.map(([, u], k) => `${r.ans[k]}${u}`).join(' ');
+  ctx.font = `36px ${head}`; const aw = ctx.measureText(ansText).width + 50;
+  ctx.strokeStyle = '#5b7342'; ctx.lineWidth = 4; rr(ctx, PAD + 60, y - 10, aw, 64, 16); ctx.stroke();
+  ctx.fillStyle = '#2f2a24'; ctx.fillText(ansText, PAD + 85, y + 36);
+  const badge = r.correct ? (r.tries === 1 ? '한 번에 해결 ✔' : '다시 생각해서 해결 ✔') : '생각 과정 인증 🌱';
+  ctx.font = `28px ${head}`; const bw = ctx.measureText(badge).width + 40;
+  ctx.fillStyle = r.correct ? '#e8efdc' : '#fbe7dc'; rr(ctx, W - PAD - bw, y - 6, bw, 56, 28); ctx.fill();
+  ctx.fillStyle = r.correct ? '#5b7342' : '#d9774a'; ctx.fillText(badge, W - PAD - bw + 20, y + 32);
+  y += 110;
+  ctx.fillStyle = '#7d7266'; ctx.font = `24px ${body}`;
+  ctx.fillText(`생각한 시간 ${Math.max(1, Math.round(r.secs / 60))}분${r.hint ? ' · 힌트 사용' : ''}`, PAD, y);
+  ctx.fillStyle = '#5b7342'; ctx.font = `bold 32px Gaegu, cursive`; ctx.textAlign = 'right';
+  ctx.fillText('정답을 보기 전에, 내 생각이 먼저 남았어요.', W - PAD, y); ctx.textAlign = 'left';
+  return cv.toDataURL('image/png');
+}
+function wireCard(root, url, name) {
+  $('#saveCard', root).onclick = () => { const a = document.createElement('a'); a.href = url; a.download = name; a.click(); };
+  const sh = $('#shareCard', root);
+  fetch(url).then(r => r.blob()).then(b => {
+    const file = new File([b], name, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      sh.classList.remove('hidden');
+      sh.onclick = () => navigator.share({ files: [file], title: '시각화 챌린지 풀이 인증' }).catch(() => { });
+    }
+  });
+}
+async function finishCard(st) {
+  try { await Promise.all([document.fonts.load('40px Jua', st.name + '4주 챌린지 완주 초'), document.fonts.load('32px "Gowun Dodum"', '20일 동안 생각을 그림으로 꺼내고, 분 동안 스스로 생각했어요. 0123456789' + DB.academy), document.fonts.load('bold 40px Gaegu', '“알아요”에서 “혼자 풀 수 있어요”로!')]); } catch (e) { }
+  const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1080;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#f6f0e6'; ctx.fillRect(0, 0, 1080, 1080);
+  ctx.fillStyle = '#fffdf8'; rr(ctx, 50, 50, 980, 980, 50); ctx.fill();
+  ctx.strokeStyle = '#8fb069'; ctx.lineWidth = 6; rr(ctx, 80, 80, 920, 920, 36); ctx.stroke();
+  const svg = plant(4, 300).replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="310"');
+  const im = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)).catch(() => null);
+  if (im) ctx.drawImage(im, 390, 150, 300, 310);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#5b7342'; ctx.font = '72px Jua, sans-serif'; ctx.fillText('4주 챌린지 완주', 540, 560);
+  ctx.fillStyle = '#2f2a24'; ctx.font = '54px Jua, sans-serif'; ctx.fillText(`${st.name} (초${st.grade})`, 540, 660);
+  ctx.font = '32px "Gowun Dodum", sans-serif'; ctx.fillStyle = '#7d7266';
+  const p = progress(st);
+  ctx.fillText(`20일 동안 생각을 그림으로 꺼내고, ${Math.round(p.secs / 60)}분 동안 스스로 생각했어요.`, 540, 740);
+  ctx.fillStyle = '#5b7342'; ctx.font = 'bold 40px Gaegu, cursive'; ctx.fillText('“알아요”에서 “혼자 풀 수 있어요”로!', 540, 830);
+  ctx.fillStyle = '#7d7266'; ctx.font = '28px "Gowun Dodum", sans-serif'; ctx.fillText(`${DB.academy} · ${today().replace(/-/g, '.')}`, 540, 930);
+  const a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = `${st.name}_완주카드.png`; a.click();
+}
+
+/* ================= 다시 보기 ================= */
+async function vReview() {
+  const st = DB.students.find(s => s.id === view.sid); if (!st) return go('home');
+  const i = view.i, pr = probs(st.grade)[i], r = st.recs[pid(st.grade, i)];
+  if (!pr || !r) return go(view.back || 'dash');
+  const SELF = ['거의 같았어요', '조금 달랐어요', '많이 달랐어요'];
+  app.innerHTML = `
+  <div class="qhead"><button class="btn line sm" id="back">← 돌아가기</button><span class="pill o">Day ${i + 1}</span><span class="pill">${esc(st.name)} · 초${st.grade}</span><span class="small muted">${fmtDate(r.date)} 인증</span></div>
+  <section class="card"><h2 style="margin:0 0 8px">내 풀이 카드</h2><div id="cardBox" class="muted small">카드를 만드는 중…</div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost sm" id="saveCard">⬇️ 카드 저장</button><button class="btn ghost sm hidden" id="shareCard">📤 보내기</button></div></section>
+  <section class="card"><h2 style="margin:0 0 8px">다시 살펴본 생각</h2>
+    <p style="margin:0">내 생각과 모범 풀이: <b>${r.self != null ? SELF[r.self] : '-'}</b></p>
+    <p style="margin:6px 0 0" class="hand" style="font-size:20px">“${esc(r.note || '아직 쓰지 않았어요')}”</p>
+    <p class="small muted" style="margin:6px 0 0">${['구하는 것 먼저', '그림에 수와 관계', '그림 보고 식'].filter((_, k) => r.checks?.[k]).map(x => '✔ ' + x).join(' · ')}</p></section>
+  <section class="card model"><h2 style="margin:0">모범 시각화 풀이</h2><div class="mini" style="margin-top:10px">${frac(pr.t)}</div>${modelParts(pr).join('')}</section>`;
+  $('#back').onclick = () => go(view.back || 'dash', view.backArgs || {});
+  const url = await makeCard(st, pr, i, r);
+  if (view.name !== 'review') return;
+  $('#cardBox').innerHTML = `<img class="cardimg" src="${url}" alt="풀이 인증 카드">`;
+  wireCard(app, url, `${st.name}_Day${i + 1}_인증.png`);
+}
+
+/* ================= 선생님 ================= */
+let teacherOK = false;
+function askPin(cb) {
+  if (teacherOK) return cb();
+  const ov = overlay(`<h2 style="margin:0 0 6px">선생님 메뉴</h2><p class="small muted" style="margin:0 0 12px">비밀번호를 입력해 주세요. (처음 비밀번호: 0000)</p>
+    <input id="pin" type="password" inputmode="numeric" maxlength="8" style="text-align:center;font-size:24px;letter-spacing:6px">
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn line" data-x>취소</button><button class="btn" id="ok">들어가기</button></div>`);
+  const inp = $('#pin', ov); inp.focus();
+  const tryIt = () => { if (inp.value === DB.pin) { teacherOK = true; ov.remove(); cb(); } else { inp.value = ''; toast('비밀번호가 달라요.'); } };
+  $('#ok', ov).onclick = tryIt; inp.onkeydown = e => { if (e.key === 'Enter') tryIt(); };
+}
+function vTeacher() {
+  const tab = view.tab || 'students';
+  app.innerHTML = `<h2 style="margin:4px 0 10px">👩‍🏫 선생님 메뉴</h2>
+    <div class="tabs">${[['students', '학생 현황'], ['bank', '문제·풀이 보기'], ['print', '학습지 인쇄'], ['settings', '설정·백업']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}
+      <button id="tOut" style="margin-left:auto">나가기</button></div><div id="tBody"></div>`;
+  $$('[data-tab]').forEach(b => b.onclick = () => go('teacher', { tab: b.dataset.tab }));
+  $('#tOut').onclick = () => { teacherOK = false; go(student() ? 'dash' : 'home'); };
+  const tb = $('#tBody');
+  ({ students: tStudents, bank: tBank, print: tPrint, settings: tSettings })[tab](tb);
+}
+function tStudents(tb) {
+  if (view.sid) return tStudentDetail(tb, DB.students.find(s => s.id === view.sid));
+  if (!DB.students.length) { tb.innerHTML = `<div class="card muted">아직 등록된 학생이 없어요.</div>`; return; }
+  tb.innerHTML = `<div class="card scroll-x"><table class="tb"><thead><tr><th>이름</th><th>학년</th><th>기록</th><th>한 번에</th><th>연속</th><th>최근</th><th></th></tr></thead><tbody>
+    ${DB.students.map(s => {
+      const p = progress(s);
+      const lastD = Object.values(s.recs || {}).map(r => r.date).sort().pop();
+      return `<tr><td><b>${esc(s.name)}</b></td><td>초${s.grade}</td><td>${p.certCount}/20</td><td>${p.first}</td><td>${p.streak}일</td><td>${fmtDate(lastD) || '-'}</td>
+        <td style="white-space:nowrap"><button class="btn ghost sm" data-see="${s.id}">자세히</button></td></tr>`;
+    }).join('')}</tbody></table>
+    <p class="small muted">기록은 이 기기(브라우저)에만 저장돼요. 학생이 집에서 풀면 <b>인증 카드</b>를 카톡·카페로 받아 확인해 주세요.</p></div>`;
+  $$('[data-see]').forEach(b => b.onclick = () => go('teacher', { tab: 'students', sid: b.dataset.see }));
+}
+function tStudentDetail(tb, s) {
+  if (!s) return go('teacher');
+  const p = progress(s);
+  tb.innerHTML = `<div class="card">
+    <div class="row between"><h3 style="margin:0">${esc(s.name)} · 초${s.grade}</h3><button class="btn line sm" id="tBack">← 목록</button></div>
+    <div class="row" style="margin:12px 0">
+      <button class="btn ghost sm" id="extra">오늘 1문제 더 열기</button>
+      <label class="row small">학년 바꾸기 <select id="grade" style="width:auto">${[2, 3, 4, 5].map(g => `<option ${g === s.grade ? 'selected' : ''}>${g}</option>`).join('')}</select></label>
+      <button class="btn line sm" id="del" style="color:var(--o)">학생 삭제</button>
+    </div>
+    <div class="scroll-x"><table class="tb"><thead><tr><th>Day</th><th>날짜</th><th>결과</th><th>시간</th><th>힌트</th><th>알게 된 점</th><th></th></tr></thead><tbody>
+    ${p.P.map((_, i) => {
+      const r = p.recs[pid(s.grade, i)];
+      if (!r) return `<tr><td>${i + 1}</td><td colspan="6" class="muted">-</td></tr>`;
+      return `<tr><td>${i + 1}</td><td>${fmtDate(r.date)}</td><td>${r.correct ? (r.tries === 1 ? '✔ 한 번에' : '✔ 두 번째') : '△ 과정 인증'}</td><td>${Math.round(r.secs / 60)}분</td><td>${r.hint ? '💡' : ''}</td>
+        <td class="small">${esc(r.note || (r.done ? '' : '(비교 전)'))}</td><td><button class="btn ghost sm" data-rv="${i}">보기</button></td></tr>`;
+    }).join('')}</tbody></table></div></div>`;
+  $('#tBack').onclick = () => go('teacher', { tab: 'students' });
+  $('#extra').onclick = () => { const t = today(); s.extra = s.extraDate === t ? (s.extra || 0) + 1 : 1; s.extraDate = t; save(); toast(`${s.name}: 오늘 한 문제 더 열었어요.`); };
+  $('#grade').onchange = e => { if (confirm('학년을 바꾸면 새 학년 문제부터 시작해요. (이전 기록은 남아요)')) { s.grade = +e.target.value; save(); } go('teacher', { tab: 'students', sid: s.id }); };
+  $('#del').onclick = async () => {
+    if (!confirm(`${s.name} 학생의 모든 기록을 지울까요? 되돌릴 수 없어요.`)) return;
+    const ks = await IMG.keys(); for (const k of ks || []) if (String(k).startsWith(s.id + '/')) await IMG.del(k);
+    DB.students = DB.students.filter(x => x !== s); if (DB.current === s.id) DB.current = null; save(); go('teacher', { tab: 'students' });
+  };
+  $$('[data-rv]').forEach(b => b.onclick = () => go('review', { i: +b.dataset.rv, sid: s.id, back: 'teacher', backArgs: { tab: 'students', sid: s.id } }));
+}
+function tBank(tb) {
+  const g = view.g || 3;
+  tb.innerHTML = `<div class="grades" style="margin-bottom:10px">${[2, 3, 4, 5].map(x => `<button data-g="${x}" class="${x === g ? 'on' : ''}">초${x}</button>`).join('')}</div>
+    <div class="plist">${probs(g).map((pr, i) => `<details><summary>Day ${i + 1} · ${esc(WEEK_TOPICS[g][weekOf(i) - 1])} — 답 ${pr.a.map(([v, u]) => esc(v) + esc(u)).join(' ')}</summary>
+      <div class="mini" style="margin-top:8px">${frac(pr.t)}</div><div class="small" style="margin-top:6px">💡 힌트: ${frac(pr.h)}</div><div class="model">${modelParts(pr).join('')}</div></details>`).join('')}</div>`;
+  $$('[data-g]', tb).forEach(b => b.onclick = () => go('teacher', { tab: 'bank', g: +b.dataset.g }));
+}
+function tPrint(tb) {
+  tb.innerHTML = `<div class="card">
+    <p style="margin:0 0 10px">학원에서 종이로 풀 때 쓰는 학습지예요. 한 장에 문제 하나와 그림 칸이 들어가요.</p>
+    <div class="row"><label class="row">학년 <select id="pg" style="width:auto">${[2, 3, 4, 5].map(g => `<option value="${g}">초${g}</option>`).join('')}</select></label>
+      <label class="row">주차 <select id="pw" style="width:auto"><option value="0">전체 4주</option>${[1, 2, 3, 4].map(w => `<option value="${w}">${w}주차</option>`).join('')}</select></label>
+      <label class="row small"><input type="checkbox" id="pk" style="width:auto"> 모범 풀이(답지) 포함</label></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="doPrint">🖨 인쇄하기</button></div></div>`;
+  $('#doPrint').onclick = () => {
+    const g = +$('#pg').value, w = +$('#pw').value, key = $('#pk').checked;
+    const list = probs(g).map((pr, i) => ({ pr, i })).filter(x => !w || weekOf(x.i) === w);
+    $('#printArea').innerHTML = list.map(({ pr, i }) => `<div class="psheet">
+      <div style="display:flex;justify-content:space-between"><b>시각화 챌린지 · 초${g} · Day ${i + 1}</b><span>이름: ________ 날짜: ____</span></div>
+      <div class="pprob">${frac(pr.t)}</div>
+      <div>구하는 것: <span class="pline" style="display:inline-block;width:70%"></span></div>
+      <div class="pbox"><span>그림 · 수직선 · 막대 · 표로 나타내기</span></div>
+      <div>식</div><div class="pline"></div><div class="pline"></div>
+      <div style="margin-top:8px">답: ________ ${esc(pr.a.map(a => a[1]).join(' '))}</div>
+      <div style="margin-top:8px">모범 풀이와 비교해서 알게 된 점</div><div class="pline"></div></div>
+      ${key ? `<div class="psheet model"><b>Day ${i + 1} 모범 풀이</b>${modelParts(pr).join('')}</div>` : ''}`).join('');
+    window.print();
+  };
+}
+function tSettings(tb) {
+  tb.innerHTML = `<div class="card">
+    <h3 style="margin:0 0 8px">학습 규칙</h3>
+    <label class="row"><input type="checkbox" id="daily" style="width:auto" ${DB.daily ? 'checked' : ''}> 하루에 한 문제만 열기 (끄면 이어서 계속 풀 수 있어요)</label>
+    <h3 style="margin:18px 0 8px">학원 이름 (완주 카드에 표시)</h3>
+    <input id="acad" maxlength="20" value="${esc(DB.academy)}">
+    <h3 style="margin:18px 0 8px">비밀번호 바꾸기</h3>
+    <div class="row"><input id="np" type="password" inputmode="numeric" maxlength="8" placeholder="새 비밀번호 (4자리 이상)" style="max-width:240px"><button class="btn ghost sm" id="setPin">바꾸기</button></div>
+    <h3 style="margin:18px 0 8px">백업</h3>
+    <p class="small muted" style="margin:0 0 8px">기기를 바꾸거나 브라우저 기록을 지우기 전에 백업 파일을 저장해 두세요. (그림 포함)</p>
+    <div class="row"><button class="btn ghost sm" id="exp">⬇️ 백업 저장</button><label class="btn ghost sm" style="cursor:pointer">⬆️ 백업 불러오기<input type="file" id="imp" accept="application/json,.json" hidden></label></div>
+  </div>`;
+  $('#daily').onchange = e => { DB.daily = e.target.checked; save(); toast('저장했어요.'); };
+  $('#acad').onchange = e => { DB.academy = e.target.value.trim() || DEFAULTS.academy; save(); toast('저장했어요.'); };
+  $('#setPin').onclick = () => { const v = $('#np').value.trim(); if (v.length < 4) return toast('4자리 이상으로 정해 주세요.'); DB.pin = v; save(); $('#np').value = ''; toast('비밀번호를 바꿨어요.'); };
+  $('#exp').onclick = async () => {
+    const imgs = {}; for (const k of (await IMG.keys()) || []) imgs[k] = await IMG.get(k);
+    const blob = new Blob([JSON.stringify({ v: 1, db: DB, imgs })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `시각화챌린지_백업_${today()}.json`; a.click();
+  };
+  $('#imp').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      if (!data.db || !Array.isArray(data.db.students)) throw 0;
+      if (!confirm('백업을 불러오면 지금 기록이 백업 내용으로 바뀌어요. 계속할까요?')) return;
+      DB = Object.assign({}, DEFAULTS, data.db); save();
+      for (const [k, v] of Object.entries(data.imgs || {})) await IMG.set(k, v);
+      toast('백업을 불러왔어요.'); go('teacher', { tab: 'students' });
+    } catch (err) { toast('백업 파일을 읽지 못했어요.'); }
+  };
+}
+
+go(student() ? 'dash' : 'home');
+</script>
+</body>
+</html>
