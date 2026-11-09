@@ -1,0 +1,8 @@
+{
+  "name": "word-playground",
+  "private": true,
+  "description": "영단어 놀이터 + 시각화 챌린지 + W·C·S 문제은행 (정적 페이지와 Vercel 함수)",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0"
+  }
+}

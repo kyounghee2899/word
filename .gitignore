@@ -7,3 +7,6 @@ __pycache__/
 .env.*
 !.env.example
 .vercel/
+
+# 설치된 패키지
+node_modules/
