@@ -1000,7 +1000,23 @@ function guideHTML(p){
    <div class="method"><div class="W"><b>W 물어보는 것</b>${wT}</div><div class="C"><b>C 조건 + 그림</b>${cT}</div><div class="S"><b>S 식과 답</b>${sT}</div></div>
    <div class="nb" aria-label="공책 쓰기 예시"><div><b class="w">W</b>${rep?'1. ':''}○○를 구한다.</div><div><b class="c">C</b>조건 ① …  ② …</div><div class="s2"><span class="sk">${rep?'조건 그림':esc(VISNAME[t])+' 그리기'}</span></div><div><b class="s">S</b>식: ……  =  ……</div><div class="s2">따라서 ……입니다.</div></div></section>`;
 }
+const NOGRADE=()=>SAMPLE_STATE==='none'||SAMPLE_STATE==='nokey';
+function checkList(items,state,act){
+  return`<ul class="selfl">${items.map(([tag,t],i)=>`<li><button class="selfi${state[i]?' on':''}" role="checkbox" aria-checked="${!!state[i]}" data-act="${act}" data-i="${i}"><span class="bx" aria-hidden="true">${state[i]?'✓':''}</span>${tag?`<b class="tg ${tag}">${tag}</b>`:''}<span>${esc(t)}</span></button></li>`).join('')}</ul>`;
+}
+function selfHTML(p,v){
+  v.self=v.self||{};
+  const rep=p.s==='rep',vis=rep?'조건 그림':VISNAME[p.cv.type];
+  const items=[['W',rep?'세 문제 모두 물어보는 것을 한 줄로 썼어요.':'물어보는 것을 한 줄로 썼어요.'],['C','문제 속 조건을 빠짐없이 옮겨 썼어요.'],['C',`조건을 ${jo(vis,'으로','로')} 나타내고, 모르는 것은 □로 표시했어요.`],['S','그림을 보고 식을 세워 계산했어요.'],['S',`답을 ${p.unit?'단위와 함께 ':''}"따라서 ~입니다."로 썼어요.`],['','모범 풀이와 비교해서 다른 점을 고쳤어요.']];
+  const all=items.every((_,i)=>v.self[i]);
+  return`<section class="upl"><h3>공책 풀이 스스로 점검하기</h3>
+   <p class="nlinfo">공책에 W·C·S로 푼 다음, 아래 항목을 하나씩 확인해요. 마지막에는 꼭 모범 풀이와 비교해 봐요.</p>
+   ${checkList(items,v.self,'self')}
+   <div class="row"><button class="btn ghost" data-act="sol">${v.sol?'모범 풀이 닫기':'모범 풀이와 비교하기'}</button><button class="btn s" data-act="self-done" ${all&&!isDone(p)?'':'disabled'}>${isDone(p)?'✓ 점검 완료':'스스로 점검 완료'}</button></div>
+   ${isDone(p)?'<div class="done-ban">✓ 이 문제를 W·C·S로 풀고 스스로 점검했어요.</div>':all?'':'<p class="nlinfo">모든 항목을 확인하면 「스스로 점검 완료」를 누를 수 있어요.</p>'}</section>`;
+}
 function uploadHTML(p,v){
+  if(NOGRADE())return selfHTML(p,v);
   const note={loading:'채점 기능을 준비하는 중이에요…',none:'자동 채점은 claude.ai에서 이 페이지를 열었을 때 쓸 수 있어요. 지금은 아래 모범 풀이로 스스로 확인해 보세요.',noimg:'이 화면에서는 사진을 보낼 수 없어요. claude.ai에서 이 페이지를 열어 주세요.',denied:'Claude 사용이 허락되지 않아 지금은 채점할 수 없어요. 아래 모범 풀이로 스스로 확인해 보세요.',nokey:'사진 채점이 아직 켜지지 않았어요. 아래 모범 풀이로 스스로 확인해 보세요. (선생님: Vercel 설정에 ANTHROPIC_API_KEY를 넣고 다시 배포하세요.)',ok:''}[SAMPLE_STATE];
   const can=v.files.length&&!v.busy&&SAMPLE_STATE==='ok';
   return`<section class="upl"><h3>풀이 사진 올리기</h3>
@@ -1271,7 +1287,7 @@ function renderC(){
   </section>`;
   if(s.sol)h+=`<section class="sol"><h3>정답 그림</h3><div class="blk C"><b>필요한 조건</b><ul>${it.C.map(c=>`<li>${fx(c)}</li>`).join('')}</ul><p class="nlinfo">조건이 아닌 것: ${it.X.map(fx).join(' · ')}</p><div class="panel">${cvHTML(it.cv,{v:{}},'cs',true)}</div></div></section>`;
   const can=s.files.length&&!s.busy&&SAMPLE_STATE==='ok';
-  h+=`<section class="upl"><h3>공책에 직접 그려 보기 <small class="optl">선택</small></h3><p class="nlinfo">빈칸 채우기가 익숙해지면, 같은 문제의 조건 그림을 공책에 직접 그려서 찍어 올려요. 조건 그림만 채점해요.</p>
+  h+=NOGRADE()?selfC(s):`<section class="upl"><h3>공책에 직접 그려 보기 <small class="optl">선택</small></h3><p class="nlinfo">빈칸 채우기가 익숙해지면, 같은 문제의 조건 그림을 공책에 직접 그려서 찍어 올려요. 조건 그림만 채점해요.</p>
    <label class="drop" for="cphoto">${CAM}<span><b>조건 그림 사진 올리기</b><small>밝은 곳에서 위에서 찍어요 · 최대 ${LIM}장</small></span></label>
    <input type="file" id="cphoto" class="vh" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
    ${s.files.length?`<div class="thumbs">${s.urls.map((u,i)=>`<figure><img src="${u}" alt="올린 사진 ${i+1}"><button data-act="c-rm" data-i="${i}" aria-label="사진 ${i+1} 빼기" ${s.busy?'disabled':''}>×</button></figure>`).join('')}</div>`:''}
@@ -1281,6 +1297,14 @@ function renderC(){
   if(s.result)h+=resultC(s.result);
   h+=`<div class="nav"><button class="btn ghost" data-act="c-go" data-k="${pv||''}" ${pv?'':'disabled'}>← ${pv?esc(lab(pv)):'이전'}</button><button class="btn" data-act="c-go" data-k="${nx||''}" ${nx?'':'disabled'}>${nx?esc(lab(nx)):'다음'} →</button></div></article>`;
   work.innerHTML=h;
+}
+function selfC(s){
+  s.self=s.self||{};
+  const items=[['','조건에 나온 수를 모두 그림에 적었어요.'],['','수 사이의 관계(많고 적음, 부분과 전체, 몇 배, 계산 순서)가 그림에 보여요.'],['','모르는 것을 □로 표시했어요.'],['','정답 그림과 비교해서 다른 점을 고쳤어요.']];
+  return`<section class="upl"><h3>공책에 직접 그려 보기 <small class="optl">선택</small></h3>
+   <p class="nlinfo">빈칸 채우기가 익숙해지면, 같은 문제의 조건 그림을 공책에 직접 그려 보세요. 다 그렸으면 아래 항목을 확인하고 정답 그림과 비교해요.</p>
+   ${checkList(items,s.self,'c-self')}
+   <div class="row"><button class="btn ghost" data-act="c-sol">${s.sol?'정답 그림 닫기':'정답 그림과 비교하기'}</button></div></section>`;
 }
 function resultC(r){
   if(!r.readable)return`<section class="res"><h3>사진을 읽기 어려워요</h3><p class="fbk">${esc(r.retake||'그림이 잘 보이게 밝은 곳에서 다시 찍어 주세요.')}</p></section>`;
@@ -1365,6 +1389,7 @@ work.addEventListener('click',e=>{
     case'c-check':s.checked=true;s.cv.checked=true;if(chipOkC(s)&&cvOk(s.it.cv,s.cv)&&!s.counted){s.counted=true;DB.cp[UI.ck]=(DB.cp[UI.ck]||0)+1;save();}break;
     case'c-new':if(s.busy)return;s.urls.forEach(u=>URL.revokeObjectURL(u));VCS[UI.ck]=newVC(UI.ck);break;
     case'c-sol':s.sol=!s.sol;break;
+    case'c-self':{s.self=s.self||{};const i=+b.dataset.i;s.self[i]=!s.self[i];break;}
     case'c-grade':gradeC(UI.ck);return;
     case'c-stop':s.ctl&&s.ctl.abort();return;
     case'c-rm':{const i=+b.dataset.i;URL.revokeObjectURL(s.urls[i]);s.files.splice(i,1);s.urls.splice(i,1);s.err='';break;}
@@ -1386,6 +1411,8 @@ work.addEventListener('click',e=>{
     case'grade':grade(p);return;
     case'stop':v.ctl&&v.ctl.abort();return;
     case'rmfile':{const i=+b.dataset.i;URL.revokeObjectURL(v.urls[i]);v.files.splice(i,1);v.urls.splice(i,1);v.err='';break;}
+    case'self':{v.self=v.self||{};const i=+b.dataset.i;v.self[i]=!v.self[i];break;}
+    case'self-done':DB.done[p.id]=true;save();renderSide();break;
     case'hint':v.hints=Math.min((p.hints||[]).length,v.hints+1);break;
     case'sol':v.sol=!v.sol;break;
     case'rep-new':DB.reps[p.id]=newItems(p);v.result=null;save();break;
@@ -1518,6 +1545,13 @@ work.addEventListener('input',e=>{if(e.target.id==='wcscode'){try{localStorage.s
 .optl{font-family:var(--f-body);font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 8px;vertical-align:middle}
 .fbk.okc{color:var(--ok)}
 .fl-op input.cell{width:4.6em}
+.selfl{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.selfi{width:100%;display:flex;gap:10px;align-items:center;text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 12px;font-size:15px}
+.selfi .bx{width:22px;height:22px;flex:none;border:2px solid var(--muted);border-radius:6px;display:grid;place-items:center;font-weight:700;color:var(--card)}
+.selfi.on{border-color:var(--ok);background:var(--ok-soft)}.selfi.on .bx{background:var(--ok);border-color:var(--ok)}
+.selfi .tg{font-family:var(--f-disp);font-weight:400;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--card);flex:none}
+.tg.W{background:var(--w)}.tg.C{background:var(--c)}.tg.S{background:var(--s)}
+@media (max-width:480px){.sheet{padding:16px 12px}.upl,.stage,.res,.sol,.tcard{padding:12px 10px}.selfi{padding:8px 10px;gap:8px}}
 .codef{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700}
 .codef input{font:inherit;font-weight:400;border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;background:var(--card);color:var(--ink);width:12em}
 .ptxt{fill:var(--ink);font-size:14px;font-family:var(--f-body)}.ptxt.b{font-size:18px;font-weight:700}.ptxt.q{fill:var(--redpen)}.ptxt.sm{font-size:12px;fill:var(--muted)}
