@@ -705,7 +705,176 @@ window.BR_GAMES = (function () {
     }
   };
 
-  const list = [symbol, coding, compare, digits, grid, nback, stroop, switcher, gonogo, trail, hanoi];
+  /* =====================================================================
+   * 실행기능 6. 타일 맞추기 (자기 점검형 짝 맞추기 — 뒤집어 무늬로 확인)
+   * 문제 타일을 답 칸에 놓고, 다 놓으면 뒤집어 '완성 무늬'와 비교해 스스로 틀린 칸을 찾습니다.
+   * ===================================================================== */
+  const TL_COLORS = ['#FF7A45', '#2E9BFF', '#9B5CF6', '#12B76A', '#FFB400', '#F0447A'];
+  function tlDesigns() {
+    const cols = shuffle(TL_COLORS), out = new Array(12);
+    let k = 0;
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) {
+      const shape = pick(['q', 't', 'h']);
+      const d = { color: cols[k++], shape, corner: shape === 'h' ? R(2) : R(4) };
+      out[r * 4 + c] = d; out[r * 4 + (3 - c)] = Object.assign({}, d, { mirror: true });
+    }
+    return out;
+  }
+  function tlSVG(d) {
+    const M = d.mirror, mc = c => (M ? [1, 0, 3, 2][c] : c);
+    let shape;
+    if (d.shape === 'q') { const cs = [[0, 0], [100, 0], [100, 100], [0, 100]][mc(d.corner)]; shape = `<circle cx="${cs[0]}" cy="${cs[1]}" r="80" fill="${d.color}"/>`; }
+    else if (d.shape === 't') { const tris = ['0,0 100,0 0,100', '0,0 100,0 100,100', '100,0 100,100 0,100', '0,0 100,100 0,100']; shape = `<polygon points="${tris[mc(d.corner)]}" fill="${d.color}"/>`; }
+    else { const side = M ? 1 - d.corner : d.corner; shape = `<rect x="${side ? 50 : 0}" y="0" width="50" height="100" fill="${d.color}"/>`; }
+    return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${d.color}" fill-opacity=".16"/>${shape}</svg>`;
+  }
+  function uniqItems(n, make) {
+    const out = [], seen = new Set(); let guard = 0;
+    while (out.length < n && guard++ < 8000) { const it = make(); if (!seen.has(it.key)) { seen.add(it.key); out.push(it); } }
+    return out;
+  }
+  const between = (a, b) => a + R(b - a + 1);
+  function dotsSVG(n) {
+    const per = n <= 4 ? n : n <= 8 ? 4 : 4, rows = Math.ceil(n / per), W = 64, H = 16 * rows + 6;
+    let c = '';
+    for (let i = 0; i < n; i++) { const r = Math.floor(i / per), k = i % per, inRow = Math.min(per, n - r * per); const x = W / 2 + (k - (inRow - 1) / 2) * 15; c += `<circle cx="${x}" cy="${11 + r * 16}" r="5.5" fill="currentColor"/>`; }
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${c}</svg>`;
+  }
+  function clockSVG(hh, mm) {
+    const ha = ((hh % 12) + mm / 60) * 30 * Math.PI / 180, ma = mm * 6 * Math.PI / 180;
+    let ticks = '';
+    for (let i = 0; i < 12; i++) { const a = i * 30 * Math.PI / 180; ticks += `<line x1="${25 + 17 * Math.sin(a)}" y1="${25 - 17 * Math.cos(a)}" x2="${25 + 20 * Math.sin(a)}" y2="${25 - 20 * Math.cos(a)}" stroke="currentColor" stroke-width="${i % 3 ? 1.2 : 2.2}"/>`; }
+    return `<svg viewBox="0 0 50 50" width="46" height="46" aria-hidden="true"><circle cx="25" cy="25" r="23" fill="none" stroke="currentColor" stroke-width="2.4"/>${ticks}<line x1="25" y1="25" x2="${25 + 10 * Math.sin(ha)}" y2="${25 - 10 * Math.cos(ha)}" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><line x1="25" y1="25" x2="${25 + 16 * Math.sin(ma)}" y2="${25 - 16 * Math.cos(ma)}" stroke="#F04438" stroke-width="2.2" stroke-linecap="round"/><circle cx="25" cy="25" r="2.2" fill="currentColor"/></svg>`;
+  }
+  function pieSVG(n, d) {
+    let s = '';
+    for (let i = 0; i < d; i++) {
+      const a0 = (i / d) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / d) * 2 * Math.PI - Math.PI / 2;
+      const p = `M20 20 L${20 + 17 * Math.cos(a0)} ${20 + 17 * Math.sin(a0)} A17 17 0 0 1 ${20 + 17 * Math.cos(a1)} ${20 + 17 * Math.sin(a1)} Z`;
+      s += `<path d="${p}" fill="${i < n ? '#2E9BFF' : 'none'}" stroke="currentColor" stroke-width="1.6"/>`;
+    }
+    return `<svg viewBox="0 0 40 40" width="42" height="42" aria-hidden="true">${s}</svg>`;
+  }
+  const frac = (n, d) => `<span class="fr"><i>${n}</i><i>${d}</i></span>`;
+  const TL_GEN = [null,
+    () => distinct(12).map(id => ({ q: symSVG(id, 32), a: symSVG(id, 28), key: id })),
+    () => shuffle([...Array(12)].map((_, i) => i + 1)).map(n => ({ q: dotsSVG(n), a: String(n), key: n })),
+    () => uniqItems(12, () => { const s = between(3, 18), a = between(Math.max(1, s - 9), Math.min(9, s - 1)); return { q: `${a}+${s - a}`, a: String(s), key: s }; }),
+    () => uniqItems(12, () => { const ans = between(0, 13), b = between(1, 9); return { q: `${ans + b}−${b}`, a: String(ans), key: ans }; }),
+    () => uniqItems(12, () => { const hh = between(1, 12), mm = pick([0, 30]); return { q: clockSVG(hh, mm), a: `${hh}:${mm ? '30' : '00'}`, key: hh * 60 + mm }; }),
+    () => uniqItems(12, () => { const st = between(1, 12), sp = between(2, 6), ans = st + sp * 3; return { q: `${st}, ${st + sp}, ${st + 2 * sp}, □`, a: String(ans), key: ans }; }),
+    () => uniqItems(12, () => { const a = between(2, 9), b = between(2, 9); return { q: `${a}×${b}`, a: String(a * b), key: a * b }; }),
+    () => uniqItems(12, () => { const d = between(2, 8), n = between(1, d - 1); return { q: pieSVG(n, d), a: frac(n, d), key: n + '/' + d }; }),
+    () => uniqItems(12, () => { const c = between(2, 13), b = between(2, 7); return { q: `${b * c}÷${b}`, a: String(c), key: c }; }),
+    () => uniqItems(12, () => {
+      const t = R(4), x = between(2, 9), y = between(2, 9), z = between(2, 9);
+      const q = [`(${x}+${y})×${z}`, `${x}×${y}−${z}`, `${x * y}÷${y}+${z}`, `${x}+${y}×${z}`][t];
+      const a = [(x + y) * z, x * y - z, x + z, x + y * z][t];
+      return { q, a: String(a), key: a };
+    })
+  ];
+  const tiles = {
+    id: 'tiles', name: '타일 맞추기', domain: 'ef', icon: '🧩', max: 10,
+    initLevel: g => ({ '7세': 1, '초1': 2, '초2': 4, '초3': 6, '초4': 8, '초5': 9, '초6': 10, '중1+': 10, '중1 이상': 10 })[g] || 1,
+    short: '문제 타일을 답 칸에 놓고, 뒤집어서 무늬로 스스로 확인',
+    how: ['위쪽 <b>문제 타일</b>을 누르고, 아래 판에서 <b>그 답이 적힌 칸</b>을 눌러 놓아요.', '12개를 다 놓으면 <b>뒤집어 확인</b>! 다 맞으면 <b>완성 무늬</b>와 똑같은 무늬가 나와요.', '무늬가 다른 칸을 <b>스스로 찾아</b> 누르고, 다시 뒤집어 고쳐요.'],
+    tip: '쉬운 문제부터 놓으면 남은 답 칸이 줄어들어 어려운 문제도 쉬워져요. 놓기 전에 답을 속으로 한 번 더 말해요.',
+    play(ctx) {
+      const L = Math.min(10, Math.max(1, ctx.st.level));
+      let items = TL_GEN[L]();
+      if (items.length < 12) items = TL_GEN[Math.max(1, L - 1)]().slice(0, 12);
+      items = items.slice(0, 12);
+      const designs = tlDesigns();
+      const slotOf = shuffle([...Array(12).keys()]);        // 문제 i의 정답 칸
+      const itemAt = new Array(12); slotOf.forEach((s, i) => { itemAt[s] = i; });
+      const placed = new Array(12).fill(null), where = new Array(12).fill(null);
+      let sel = null, checks = 0, firstOk = null, found = 0, wrongTotal = 0, phase = 'place', marks = new Set(), wrong = [];
+      const t0 = now();
+      const info = h('div', { class: 'tl-info' });
+      const target = h('div', { class: 'tl-target', 'aria-label': '완성 무늬' }, designs.map(d => h('i', { html: tlSVG(d) })));
+      const tray = h('div', { class: 'tl-tray' }), board = h('div', { class: 'tl-board' });
+      const btn = h('button', { class: 'btn pri lg wide tl-go', onclick: () => action() }, '뒤집어 확인');
+      const big = h('div', { class: 'tl-big' }, h('small', null, '완성 무늬 — 아래 판과 비교해 보세요'), h('div', { class: 'tl-big-grid' }, designs.map(d => h('i', { html: tlSVG(d) }))));
+      const wrapEl = h('div', { class: 'g-col fill tl' }, h('div', { class: 'tl-head' }, info, h('div', { class: 'tl-tgt-wrap' }, h('small', null, '완성 무늬'), target)), tray, big, board, btn);
+      ctx.stage.append(wrapEl);
+      const cards = items.map((it, i) => { const c = h('button', { class: 'tl-card', onpointerdown: tap(() => pickCard(i)) }, h('b', null, String(i + 1)), h('span', { class: 'tl-q', html: it.q })); tray.append(c); return c; });
+      const slots = [...Array(12)].map((_, s) => {
+        const num = h('span', { class: 'tl-num' });
+        const front = h('div', { class: 'tl-front' }, h('span', { class: 'tl-a', html: items[itemAt[s]].a }), num);
+        const back = h('div', { class: 'tl-back' });
+        const el = h('button', { class: 'tl-slot', onpointerdown: tap(() => pickSlot(s)) }, h('div', { class: 'tl-inner' }, front, back));
+        board.append(el); return { el, back, num };
+      });
+      function update() {
+        const n = placed.filter(x => x != null).length;
+        cards.forEach((c, i) => { c.classList.toggle('sel', sel === i); c.classList.toggle('used', where[i] != null); });
+        slots.forEach((o, s) => { o.el.classList.toggle('filled', placed[s] != null); o.num.textContent = placed[s] != null ? placed[s] + 1 : ''; o.el.classList.toggle('mark', marks.has(s)); });
+        if (phase === 'place') info.innerHTML = sel != null ? `<b class="tag f">${sel + 1}번</b> 답이 적힌 칸을 눌러요` : `문제 타일을 고르세요 · <b>${n}</b>/12`;
+        btn.disabled = phase === 'place' && n < 12;
+        ctx.hud({ score: n });
+      }
+      function pickCard(i) {
+        if (phase !== 'place') return;
+        if (where[i] != null) { const s = where[i]; placed[s] = null; where[i] = null; }
+        sel = sel === i ? null : i; ctx.sfx.blip(); update();
+      }
+      function pickSlot(s) {
+        if (phase === 'find') { marks.has(s) ? marks.delete(s) : marks.add(s); ctx.sfx.blip(); update(); return; }
+        if (phase !== 'place') return;
+        if (sel != null) {
+          if (placed[s] != null) where[placed[s]] = null;
+          placed[s] = sel; where[sel] = s; sel = null; ctx.sfx.blip();
+          slots[s].el.classList.remove('drop'); void slots[s].el.offsetWidth; slots[s].el.classList.add('drop');
+        } else if (placed[s] != null) { where[placed[s]] = null; placed[s] = null; }
+        update();
+      }
+      function action() {
+        if (phase === 'place') {
+          if (placed.some(x => x == null)) return;
+          checks++;
+          slots.forEach((o, s) => { o.back.innerHTML = tlSVG(designs[slotOf[placed[s]]]); o.el.classList.remove('bad', 'got'); });
+          wrong = [...Array(12).keys()].filter(s => slotOf[placed[s]] !== s);
+          if (firstOk == null) firstOk = 12 - wrong.length;
+          board.classList.add('flipped'); wrapEl.classList.add('checking'); ctx.sfx.blip();
+          if (!wrong.length) {
+            phase = 'done'; info.innerHTML = '<b class="tag ok">완성!</b> 무늬가 똑같아요'; btn.disabled = true; ctx.fb(true);
+            ctx.later(finish, 1300);
+          } else {
+            phase = 'find'; marks = new Set();
+            info.innerHTML = '완성 무늬와 <b>다른 칸</b>을 모두 찾아 눌러요';
+            btn.textContent = '다 찾았어요'; btn.disabled = false;
+          }
+        } else if (phase === 'find') {
+          const got = wrong.filter(s => marks.has(s)).length;
+          found += got; wrongTotal += wrong.length;
+          wrong.forEach(s => slots[s].el.classList.add('bad'));
+          [...marks].filter(s => !wrong.includes(s)).forEach(s => slots[s].el.classList.add('extra'));
+          info.innerHTML = got === wrong.length && marks.size === wrong.length ? `<b class="tag ok">정확해요!</b> 다른 칸 ${wrong.length}개를 다 찾았어요` : `다른 칸 <b>${wrong.length}개</b> 중 <b>${got}개</b>를 찾았어요`;
+          ctx.fb(got === wrong.length);
+          phase = 'review'; marks = new Set(); btn.textContent = checks >= 4 ? '결과 보기' : '다시 뒤집어 고치기';
+          update();
+        } else if (phase === 'review') {
+          if (checks >= 4) return finish();
+          board.classList.remove('flipped'); wrapEl.classList.remove('checking');
+          wrong.forEach(s => { const i = placed[s]; where[i] = null; placed[s] = null; slots[s].el.classList.remove('bad'); });
+          slots.forEach(o => o.el.classList.remove('extra', 'got'));
+          phase = 'place'; btn.textContent = '뒤집어 확인'; update();
+        }
+      }
+      const cap = 480;
+      ctx.every(() => { const t = (now() - t0) / 1000; ctx.hud({ frac: Math.max(0, 1 - t / cap), label: `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}` }); if (t >= cap && phase !== 'over') finish(); }, 250);
+      function finish() {
+        if (phase === 'over') return;
+        phase = 'over';
+        const t = Math.round((now() - t0) / 1000), fo = firstOk == null ? 0 : firstOk;
+        const delta = adapt(ctx.st, 10, fo === 12 && t <= 240, fo <= 7);
+        ctx.finish(result({ score: fo, label: `${fo}/12 한 번에 정답`, sub: `확인 ${checks}번` + (wrongTotal ? ` · 다른 칸 찾기 ${found}/${wrongTotal}` : '') + ` · ${t}초`, acc: fo / 12, delta, metrics: { firstOk: fo, checks, selfFound: found, selfWrong: wrongTotal } }));
+      }
+      update();
+    }
+  };
+
+  const list = [symbol, coding, compare, digits, grid, nback, stroop, switcher, gonogo, trail, hanoi, tiles];
   const byId = {}; list.forEach(g => { byId[g.id] = g; });
   return { list, byId, DOMAINS: { ps: { name: '처리속도', color: 'var(--ps)', desc: '보고 판단하고 손으로 반응하는 속도' }, wm: { name: '작업기억', color: 'var(--wm)', desc: '머릿속에 잠깐 담아 두고 바꾸는 힘' }, ef: { name: '실행기능', color: 'var(--ef)', desc: '참기·규칙 바꾸기·계획하기' } }, symSVG, h };
 })();

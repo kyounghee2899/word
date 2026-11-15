@@ -35,6 +35,12 @@
     S.profiles.push(p); S.cur = p.id; save(); return p;
   }
   const gst = (p, gid) => p.games[gid] || (p.games[gid] = { level: 1 });
+  // 학년에 맞춰 시작 레벨을 정하는 활동(타일 맞추기)은 처음 열 때 한 번만 맞춤
+  function ensureInit(p, gid) {
+    const g = GAME[gid], st = gst(p, gid);
+    if (g.initLevel && !st.started) { st.level = g.initLevel(p.grade); st.started = true; save(); }
+    return st;
+  }
 
   /* ---------- 루틴 짜기 ----------
    * 매일: 처리속도 1 + 작업기억 1 + 실행기능 1 (+ 4·5번째는 실행기능·작업기억에서 번갈아)
@@ -241,9 +247,9 @@
 
   /* ---------- 활동 설명 ---------- */
   function intro(gid, fromRoutine) {
-    const g = GAME[gid], p = cur(), st = gst(p, gid);
+    const g = GAME[gid], p = cur(), st = ensureInit(p, gid);
     const last = p.sessions.filter(s => s.g === gid).slice(-1)[0];
-    const dur = g.sec ? `${g.sec}초` : gid === 'hanoi' ? '2~4분' : gid === 'trail' ? '1~2분' : '약 2분';
+    const dur = g.sec ? `${g.sec}초` : gid === 'hanoi' || gid === 'tiles' ? '2~4분' : gid === 'trail' ? '1~2분' : '약 2분';
     const lvDots = h('div', { class: 'lvdots', 'aria-label': `레벨 ${st.level} / ${g.max}` }, [...Array(g.max)].map((_, i) => h('i', { class: i < st.level ? 'on' : '' })));
     screen('intro ' + g.domain,
       h('div', { class: 'bar-top' }, h('button', { class: 'icon-btn', 'aria-label': '돌아가기', onclick: () => go(view) }, ic('back', 20))),
@@ -259,7 +265,7 @@
   /* ---------- 활동 실행 ---------- */
   let active = null;
   function play(gid, fromRoutine) {
-    const g = GAME[gid], p = cur(), st = gst(p, gid);
+    const g = GAME[gid], p = cur(), st = ensureInit(p, gid);
     if (st.level > g.max) st.level = g.max;
     const snapshot = JSON.stringify(st);
     let alive = true; const timers = [], ivs = []; let keyFns = [];
@@ -390,7 +396,7 @@
   function free() {
     view = 'free';
     const p = cur(); if (!p) return onboarding();
-    shell(h('header', { class: 'top' }, h('div', null, h('p', { class: 'top-date' }, '활동 11가지'), h('h1', null, '자유 연습'))),
+    shell(h('header', { class: 'top' }, h('div', null, h('p', { class: 'top-date' }, `활동 ${GAMES.length}가지`), h('h1', null, '자유 연습'))),
       h('p', { class: 'lead' }, '원하는 활동을 골라 더 연습해요. 오늘 루틴에 있는 활동이면 완료로 표시돼요.'),
       ['ps', 'wm', 'ef'].map(d => h('section', { class: 'grp' },
         h('div', { class: 'grp-h' }, domChip(d), h('span', { class: 'muted small' }, DOMAINS[d].desc)),
@@ -638,10 +644,10 @@
         h('div', { class: 'flow' }, [['ps', '처리속도'], ['wm', '작업기억'], ['ef', '실행기능'], ['mix', '+1 번갈아']].map(([d, t], i) => h('div', { class: 'flow-s ' + d }, h('b', null, i + 1), t))),
         h('ul', { class: 'plain' },
           li('하루 약 10분 · ', '활동 하나는 1~3분이고, 하루 4개가 기본이에요(관리에서 3~5개로 조절).'),
-          li('골고루 · ', '연습한 날 수에 따라 활동이 돌아가며 나와 첫 5일 안에 11가지를 모두 만나요.'),
+          li('골고루 · ', '연습한 날 수에 따라 활동이 돌아가며 나와 첫 일주일 안에 모든 활동을 만나요.'),
           li('자동 난이도 · ', '정확도 90% 이상이면서 속도 기준을 넘으면 한 단계 오르고, 75% 아래면 내려가요. 늘 “조금 어려운” 수준을 유지해요.'),
           li('계단식 기억 · ', '숫자·위치 기억은 맞히면 한 자리 늘고 틀리면 한 자리 줄어요.'))),
-      section('활동 11가지', h('div', { class: 'gd-wrap' }, dom('ps'), dom('wm'), dom('ef'))),
+      section(`활동 ${GAMES.length}가지`, h('div', { class: 'gd-wrap' }, dom('ps'), dom('wm'), dom('ef'))),
       section('잘 쓰는 법', h('ol', { class: 'plain num' },
         li('같은 시간, 같은 자리 · ', '숙제 전 10분처럼 시간을 정해 두면 습관이 돼요.'),
         li('작전 먼저 · ', '활동마다 나오는 작전(묶어 외우기, 속으로 말하기)을 써 보게 하세요. 전략을 고르는 것 자체가 실행기능 연습이에요.'),
@@ -652,7 +658,7 @@
         h('ul', { class: 'plain' },
           h('li', null, '이 앱은 연습 도구이며 ', h('b', null, '지능·발달 검사가 아닙니다'), '. 레벨은 같은 아이의 변화를 보는 용도이고, 다른 아이와 비교하거나 진단에 쓰지 마세요.'),
           h('li', null, '연구 결과를 보면 이런 훈련으로 ', h('b', null, '연습한 과제와 비슷한 과제'), '의 실력은 꾸준히 오르지만, 성적이나 지능까지 넓게 오른다는 근거는 아직 엇갈립니다. 독서·운동·수면과 함께하는 보조 루틴으로 생각해 주세요.'),
-          h('li', null, '활동은 신경심리 연구에서 널리 쓰이는 과제 유형(기호 찾기·기호 바꾸기·숫자 따라 말하기·위치 기억·N-back·스트룹·규칙 전환·Go/No-go·선 잇기·하노이의 탑)을 본떠 새로 만든 것으로, 특정 책이나 검사 문항을 옮긴 것이 아닙니다.'),
+          h('li', null, '활동은 신경심리 연구에서 널리 쓰이는 과제 유형(기호 찾기·기호 바꾸기·숫자 따라 말하기·위치 기억·N-back·스트룹·규칙 전환·Go/No-go·선 잇기·하노이의 탑)과 자기 점검형 짝 맞추기 방식을 본떠 새로 만든 것으로, 특정 책이나 검사 문항을 옮긴 것이 아닙니다.'),
           h('li', null, '주의집중이나 학습에 지속적인 어려움이 보이면 전문가 상담을 권합니다.'))),
       section('앱으로 설치하기', h('ul', { class: 'plain' },
         li('안드로이드·PC · ', '오늘 화면의 “설치” 버튼, 또는 브라우저 메뉴 ⋮ → “앱 설치”.'),

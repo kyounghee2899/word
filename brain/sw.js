@@ -1,7 +1,7 @@
 /* 브레인 루틴 오프라인 지원
  * 앱 파일을 기기에 저장해 인터넷 없이도 열리게 합니다.
  * 파일을 고친 뒤에는 VERSION을 올려 주세요(다음 실행 때 새 버전으로 바뀝니다). */
-const VERSION = 'br-v2';
+const VERSION = 'br-v3';
 const SHELL = ['./', 'index.html', 'app.js', 'games.js', 'ui.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'];
 
 self.addEventListener('install', e => {
