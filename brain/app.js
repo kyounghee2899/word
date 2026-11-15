@@ -180,6 +180,7 @@
       h('section', { class: 'card' }, h('h2', null, '나의 두뇌 힘'),
         h('div', { class: 'doms' }, ['ps', 'wm', 'ef'].map(d => { const v = domainLevel(p, d); return h('div', { class: 'dom' }, h('div', { class: 'dom-h' }, domChip(d), h('b', null, v == null ? '—' : v.toFixed(1))), lvBar(v, d), h('small', { class: 'muted' }, DOMAINS[d].desc)); })),
         h('p', { class: 'muted small' }, '10점 만점 · 각 활동의 현재 레벨을 영역별로 평균한 값이에요.')),
+      installCard(),
       storageOk ? null : h('p', { class: 'warn' }, '⚠ 이 브라우저에서는 기록이 저장되지 않아요(사생활 보호 모드 등). 일반 창에서 열어 주세요.'));
   }
   function week(p) {
@@ -570,6 +571,12 @@
           h('li', null, '연구 결과를 보면, 이런 훈련으로 ', h('b', null, '연습한 과제 자체와 비슷한 과제'), '의 실력은 꾸준히 오르지만, 학업 성적이나 전반적 지능까지 넓게 오른다는 근거는 아직 엇갈립니다. 수학 수업·독서·운동·수면과 함께 쓰는 보조 루틴으로 생각해 주세요.'),
           h('li', null, '활동 원리는 신경심리 검사와 연구에서 널리 쓰이는 과제 유형(기호 찾기·기호 바꾸기·숫자 따라 말하기·위치 기억·N-back·스트룹·규칙 전환·Go/No-go·선 잇기·하노이의 탑)을 본떠 새로 만든 것으로, 특정 책이나 검사 문항을 옮긴 것이 아닙니다.'),
           h('li', null, '주의집중이나 학습에 지속적인 어려움이 보이면 전문가 상담을 권합니다.'))),
+      h('section', { class: 'card' }, h('h2', null, '앱으로 설치하기'),
+        h('ul', null,
+          h('li', null, h('b', null, '안드로이드·PC(크롬·엣지·삼성 인터넷)'), ': 오늘 화면의 “설치” 버튼, 또는 브라우저 메뉴 ⋮ → “앱 설치 / 홈 화면에 추가”.'),
+          h('li', null, h('b', null, '아이폰·아이패드'), ': Safari로 열고 공유 ⬆︎ → “홈 화면에 추가”. ', h('button', { class: 'btn ghost sm', onclick: iosHelp }, '자세히')),
+          h('li', null, '설치하면 주소창 없이 앱처럼 열리고, 한 번 연 뒤에는 인터넷이 없어도 동작합니다.'),
+          h('li', null, '아이폰에서는 Safari와 설치한 앱의 기록이 따로 저장됩니다. 처음부터 설치한 앱으로 쓰거나, 백업 파일로 옮기세요.'))),
       h('section', { class: 'card' }, h('h2', null, '기기 · 저장'),
         h('ul', null,
           h('li', null, '태블릿·휴대폰·PC 모두 됩니다. PC에서는 ←/→(F/J), 숫자키, 스페이스바로도 할 수 있어요.'),
@@ -578,7 +585,35 @@
     );
   }
 
+  /* ---------- 앱으로 설치 (PWA) ---------- */
+  let deferredPrompt = null;
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; if (view === 'home') home(); });
+  window.addEventListener('appinstalled', () => { deferredPrompt = null; toast('설치했어요! 홈 화면의 아이콘으로 여세요.'); if (view === 'home') home(); });
+  function installCard() {
+    if (standalone() || S.settings.hideInstall || !/^https?:/.test(location.protocol)) return null;
+    if (!deferredPrompt && !isIOS()) return null;
+    const hide = h('button', { class: 'icon-btn', title: '닫기', onclick: () => { S.settings.hideInstall = true; save(); home(); } }, '✕');
+    const act = deferredPrompt
+      ? h('button', { class: 'btn sm', onclick: async () => { const e = deferredPrompt; deferredPrompt = null; e.prompt(); try { await e.userChoice; } catch (er) { } home(); } }, '설치')
+      : h('button', { class: 'btn sm', onclick: iosHelp }, '방법 보기');
+    return h('section', { class: 'card install' }, h('img', { src: 'icons/icon-192.png', alt: '' }), h('div', null, h('b', null, '앱으로 설치하기'), h('small', null, '홈 화면 아이콘으로 바로 열고, 인터넷 없이도 돼요.')), act, hide);
+  }
+  function iosHelp() {
+    modal('아이폰·아이패드에 설치', h('ol', { class: 'how' },
+      h('li', { html: '<b>Safari</b>에서 이 페이지를 열어요. (카톡 안 브라우저에서는 안 돼요 → 오른쪽 아래 메뉴에서 “Safari로 열기”)' }),
+      h('li', { html: '아래(아이패드는 위) <b>공유 버튼 ⬆︎</b>을 눌러요.' }),
+      h('li', { html: '<b>“홈 화면에 추가”</b>를 눌러요.' }),
+      h('li', { html: '홈 화면의 <b>브레인 루틴</b> 아이콘으로 열어요.' }),
+      h('li', { html: '⚠ Safari에서 하던 기록은 설치한 앱으로 넘어가지 않아요. 기록이 있다면 선생님 메뉴에서 <b>백업 → 앱에서 불러오기</b>를 하세요.' })));
+  }
+
   /* ---------- 시작 ---------- */
-  window.addEventListener('beforeunload', () => { if (active) { /* 진행 중인 활동은 저장하지 않음 */ } });
+  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
+  }
+  // 브라우저가 저장 공간이 부족할 때 기록을 지우지 않도록 요청(지원하는 브라우저만)
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => { }); } catch (e) { }
   if (location.hash === '#teacher') go('teacher'); else go('home');
 })();

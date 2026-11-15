@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#4b5bd6">
 <meta name="description" content="하루 10분, 처리속도·작업기억·실행기능을 키우는 적응형 두뇌 루틴 (초등)">
 <title>브레인 루틴</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="브레인 루틴">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
@@ -61,6 +68,11 @@ p{margin:6px 0}
 .chk{display:flex;align-items:center;gap:6px;font-size:15.5px}
 .chk input{width:20px;height:20px;accent-color:var(--pri)}
 .warn{color:var(--warn);text-align:center}
+.install{display:flex;align-items:center;gap:12px;background:var(--pri-soft);border:0}
+.install img{width:48px;height:48px;border-radius:12px;flex:none}
+.install div{flex:1;min-width:0}
+.install b{font-family:'Jua';font-weight:400;font-size:17px;display:block}
+.install small{color:var(--muted);font-size:13px}
 
 /* 탭 */
 .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:2px;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
