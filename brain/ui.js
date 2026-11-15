@@ -15,6 +15,7 @@ window.BR_UI = (function () {
     gonogo: '<path d="M8 12.5V6a1.5 1.5 0 0 1 3 0v5M11 11V4.8a1.5 1.5 0 0 1 3 0V11M14 11V6.3a1.5 1.5 0 0 1 3 0v7.4a6.3 6.3 0 0 1-6.3 6.3h-.4a6 6 0 0 1-4.8-2.4l-2.4-3.2a1.5 1.5 0 0 1 2.3-1.9L8 15"/>',
     trail: '<circle cx="5" cy="18" r="2.2"/><circle cx="12" cy="6" r="2.2"/><circle cx="19" cy="15" r="2.2"/><path d="M6.2 16 10.8 8M13.4 7.8l4.3 5.5"/>',
     hanoi: '<path d="M12 3v16.5M3.5 20.5h17M7 16.5h10M8.5 12.5h7M10 8.5h4"/>',
+    tiles: '<rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2"/><path d="M13.8 16.9l2.2 2.2 4-4.4"/>',
     home: '<path d="M3.5 10.5 12 3.8l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-6v6H5A1.5 1.5 0 0 1 3.5 19z"/>',
     apps: '<rect x="3.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.2"/>',
     chart: '<path d="M5 19.5v-7M12 19.5V5M19 19.5v-10"/>',
